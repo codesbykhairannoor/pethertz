@@ -1,8 +1,11 @@
 import fs from 'node:fs';
 
 async function fetchFullAudit() {
-  const env = fs.readFileSync('.env', 'utf-8');
-  const key = 'LLM_2348942002539622__yTHCS0-q4ZdBIMxq1SlryiiCNY';
+  const key = process.env.META_API_KEY || process.env.META_LLAMA_API_KEY || '';
+  if (!key) {
+    console.error('Error: META_API_KEY not found in environment');
+    process.exit(1);
+  }
   const p = `Anda adalah Ahli Bioakustik & Audio DSP Senior.
 Berikut adalah arsitektur sistem kami (PetHertz) yang mendeteksi suara kucing dan anjing:
 - YIN pitch tracking (20-3500 Hz) dengan pembobotan energi RMS.
