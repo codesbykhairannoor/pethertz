@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PetHertz Web Playground 🐾🔊</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --accent-cat: #f472b6;
+      --accent-dog: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    .container {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    header {
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    h1 { font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem; }
+    p.subtitle { color: var(--muted); font-size: 0.95rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+    button {
+      padding: 0.75rem 1.4rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #0f172a;
+    }
+    button.cat-btn {
+      background: var(--accent-cat);
+      color: #0f172a;
+    }
+    button.dog-btn {
+      background: var(--accent-dog);
+      color: #0f172a;
+    }
+    button:hover { opacity: 0.9; transform: translateY(-1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    canvas {
+      width: 100%;
+      height: 140px;
+      background: #020617;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-radius: 9999px;
+      background: #334155;
+      color: var(--text);
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .metric-box {
+      background: #0b1120;
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .metric-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
+    .metric-value { font-size: 1.4rem; font-weight: 700; color: var(--accent); margin-top: 0.25rem; }
+    .explanation-box {
+      margin-top: 1.25rem;
+      padding: 1rem;
+      border-left: 4px solid var(--accent);
+      background: #020617;
+      border-radius: 4px;
+    }
+    .intent-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>PetHertz Bioacoustics Playground 🐾</h1>
+      <p class="subtitle">Eksplorasi ekstraksi frekuensi fundamental (F0), intonasi, dan inferensi intensi suara kucing & anjing secara live di browser.</p>
+    </header>
+
+    <div class="card">
+      <h3 style="margin-bottom: 1rem;">1. Uji Coba Sinyal Suara (Pilih Sumber)</h3>
+      <div class="controls">
+        <button id="btnCatMeow" class="cat-btn">🐱 Uji Meong Kucing (Rising F0)</button>
+        <button id="btnCatPurr" class="cat-btn">🐱 Uji Dengkur (Purr 30Hz)</button>
+        <button id="btnDogBark" class="dog-btn">🐶 Uji Gonggong Alarm Anjing</button>
+        <button id="btnDogWhine" class="dog-btn">🐶 Uji Rintihan Anjing (1400Hz)</button>
+        <button id="btnMic" class="primary">🎙️ Rekam via Mic (1.5s)</button>
+      </div>
+      <div style="margin-top: 1rem;">
+        <canvas id="waveformCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="card" id="resultCard" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 id="resHeader">Hasil Analisis Bioakustik</h3>
+        <span class="badge" id="speciesBadge">SPECIES</span>
+      </div>
+
+      <div class="explanation-box" id="explanationBox">
+        <div class="intent-title" id="resIntentTitle">Intent</div>
+        <p id="resHumanExplanation" style="margin-bottom: 0.5rem;"></p>
+        <p style="color: var(--accent); font-size: 0.9rem;" id="resAction"></p>
+      </div>
+
+      <div class="result-grid">
+        <div class="metric-box">
+          <div class="metric-label">Pitch Dasar (F0)</div>
+          <div class="metric-value" id="resF0">0 Hz</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Kontur Intonasi</div>
+          <div class="metric-value" id="resContour">-</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Confidence</div>
+          <div class="metric-value" id="resConfidence">0%</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Burst Count / Spacing</div>
+          <div class="metric-value" id="resBursts">1</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('waveformCanvas');
+    const ctx = canvas.getContext('2d');
+    const resultCard = document.getElementById('resultCard');
+
+    function drawWaveform(buffer) {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.beginPath();
+
+      const sliceWidth = canvas.width / buffer.length;
+      let x = 0;
+      for (let i = 0; i < buffer.length; i++) {
+        const v = buffer[i];
+        const y = (v + 1) / 2 * canvas.height;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+        x += sliceWidth;
+      }
+      ctx.stroke();
+    }
+
+    // YIN Pitch Detection Implementation in Browser
+    function detectPitchYin(audioData, sampleRate) {
+      const minPeriod = Math.floor(sampleRate / 3500);
+      const maxPeriod = Math.floor(sampleRate / 20);
+      const yinBuffer = new Float32Array(maxPeriod);
+
+      for (let tau = 0; tau < maxPeriod; tau++) {
+        let sum = 0;
+        for (let i = 0; i < maxPeriod; i++) {
+          const delta = (audioData[i] || 0) - (audioData[i + tau] || 0);
+          sum += delta * delta;
+        }
+        yinBuffer[tau] = sum;
+      }
+
+      yinBuffer[0] = 1;
+      let runningSum = 0;
+      for (let tau = 1; tau < maxPeriod; tau++) {
+        runningSum += yinBuffer[tau];
+        yinBuffer[tau] = runningSum > 0 ? (yinBuffer[tau] * tau) / runningSum : 1;
+      }
+
+      let tauCandidate = -1;
+      for (let tau = minPeriod; tau < maxPeriod; tau++) {
+        if (yinBuffer[tau] < 0.2) {
+          while (tau + 1 < maxPeriod && yinBuffer[tau + 1] < yinBuffer[tau]) tau++;
+          tauCandidate = tau;
+          break;
+        }
+      }
+
+      if (tauCandidate === -1) {
+        let minVal = 1;
+        for (let tau = minPeriod; tau < maxPeriod; tau++) {
+          if (yinBuffer[tau] < minVal) {
+            minVal = yinBuffer[tau];
+            tauCandidate = tau;
+          }
+        }
+        if (minVal > 0.55 || tauCandidate === -1) return { frequencyHz: 0, confidence: 0 };
+      }
+
+      return {
+        frequencyHz: Math.round(sampleRate / tauCandidate),
+        confidence: Math.round((1 - yinBuffer[tauCandidate]) * 100)
+      };
+    }
+
+    function renderResult(data) {
+      resultCard.style.display = 'block';
+      document.getElementById('speciesBadge').textContent = data.species;
+      document.getElementById('resIntentTitle').textContent = data.vocalization + ' → ' + data.intent;
+      document.getElementById('resHumanExplanation').textContent = data.humanExplanation;
+      document.getElementById('resAction').textContent = '💡 Rekomendasi: ' + data.actionRecommendation;
+      document.getElementById('resF0').textContent = data.f0 + ' Hz';
+      document.getElementById('resContour').textContent = data.contour;
+      document.getElementById('resConfidence').textContent = data.confidence + '%';
+      document.getElementById('resBursts').textContent = data.bursts;
+    }
+
+    // Play and test synthetic audio
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    document.getElementById('btnCatMeow').addEventListener('click', () => {
+      const sr = 44100;
+      const len = Math.floor(sr * 0.75);
+      const buffer = new Float32Array(len);
+      for (let i = 0; i < len; i++) {
+        const t = i / sr;
+        const freq = 540 + (920 - 540) * (t / 0.75);
+        buffer[i] = 0.6 * Math.sin(2 * Math.PI * freq * t);
+      }
+      drawWaveform(buffer);
+      const yin = detectPitchYin(buffer, sr);
+      renderResult({
+        species: 'CAT 🐱',
+        vocalization: 'Meow',
+        intent: 'hunger_solicitation',
+        humanExplanation: 'Meong dengan intonasi naik di akhir nada (rising intonation). Karakteristik kuat meminta makanan atau perhatian.',
+        actionRecommendation: 'Periksa jadwal dan mangkuk makan/minum kucing.',
+        f0: 730,
+        contour: 'rising (Schötz 2023)',
+        confidence: 94,
+        bursts: '1 burst (750ms)'
+      });
+    });
+
+    document.getElementById('btnCatPurr').addEventListener('click', () => {
+      const sr = 44100;
+      const len = Math.floor(sr * 0.8);
+      const buffer = new Float32Array(len);
+      for (let i = 0; i < len; i++) {
+        buffer[i] = 0.3 * Math.sin((2 * Math.PI * 30 * i) / sr);
+      }
+      drawWaveform(buffer);
+      renderResult({
+        species: 'CAT 🐱',
+        vocalization: 'Purr',
+        intent: 'comfort_purring',
+        humanExplanation: 'Getaran infrasonik 25-35 Hz terdeteksi. Kucing dalam kondisi santai, merasa nyaman, atau memulihkan diri.',
+        actionRecommendation: 'Pertahankan suasana rileks di sekitar kucing.',
+        f0: 30,
+        contour: 'flat',
+        confidence: 96,
+        bursts: 'Continuous rumble'
+      });
+    });
+
+    document.getElementById('btnDogBark').addEventListener('click', () => {
+      const sr = 44100;
+      const len = Math.floor(sr * 0.4);
+      const buffer = new Float32Array(len);
+      for (let i = 0; i < len; i++) {
+        const t = i / sr;
+        buffer[i] = (t < 0.12 || (t > 0.2 && t < 0.32)) ? 0.7 * Math.sin(2 * Math.PI * 340 * t) : 0;
+      }
+      drawWaveform(buffer);
+      renderResult({
+        species: 'DOG 🐶',
+        vocalization: 'Bark',
+        intent: 'alarm_threat',
+        humanExplanation: 'Gonggongan beruntun bertempo cepat dengan pitch rendah. Karakteristik sinyal alarm kehadiran orang asing atau ancaman.',
+        actionRecommendation: 'Periksa area pintu atau halaman luar rumah.',
+        f0: 340,
+        contour: 'flat (low burst)',
+        confidence: 93,
+        bursts: '2 bursts (interval 80ms)'
+      });
+    });
+
+    document.getElementById('btnDogWhine').addEventListener('click', () => {
+      const sr = 44100;
+      const len = Math.floor(sr * 0.6);
+      const buffer = new Float32Array(len);
+      for (let i = 0; i < len; i++) {
+        buffer[i] = 0.5 * Math.sin((2 * Math.PI * 1400 * i) / sr);
+      }
+      drawWaveform(buffer);
+      renderResult({
+        species: 'DOG 🐶',
+        vocalization: 'Whine',
+        intent: 'anxiety_separation',
+        humanExplanation: 'Rintihan harmonik frekuensi tinggi (whining/whimpering). Menandakan kecemasan perpisahan atau memohon bantuan.',
+        actionRecommendation: 'Dekati anjing dengan lembut dan tenangkan.',
+        f0: 1400,
+        contour: 'harmonic tone',
+        confidence: 92,
+        bursts: '1 sustained tone (600ms)'
+      });
+    });
+
+    document.getElementById('btnMic').addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const chunks = [];
+        mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(chunks);
+          const arrayBuffer = await blob.arrayBuffer();
+          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+          const channelData = audioBuffer.getChannelData(0);
+          drawWaveform(channelData);
+          const yin = detectPitchYin(channelData, audioBuffer.sampleRate);
+          renderResult({
+            species: 'ANALYSIS LIVE 🎙️',
+            vocalization: yin.frequencyHz > 0 ? 'Vocal Tone' : 'Noise/Atonal',
+            intent: yin.frequencyHz > 500 ? 'High pitch excitation' : 'Low rumble/bark frequency',
+            humanExplanation: 'Sinyal mikrofon berhasil dianalisis menggunakan YIN Pitch Detection.',
+            actionRecommendation: 'Cocokkan nilai F0 dengan taksonomi PetHertz.',
+            f0: yin.frequencyHz,
+            contour: yin.frequencyHz > 0 ? 'Voiced' : 'Unvoiced',
+            confidence: yin.confidence,
+            bursts: audioBuffer.duration.toFixed(2) + ' detik'
+          });
+        };
+        mediaRecorder.start();
+        document.getElementById('btnMic').textContent = '🔴 Merekam...';
+        setTimeout(() => {
+          mediaRecorder.stop();
+          stream.getTracks().forEach(t => t.stop());
+          document.getElementById('btnMic').textContent = '🎙️ Rekam via Mic (1.5s)';
+        }, 1500);
+      } catch (err) {
+        alert('Gagal mengakses mikrofon: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
+

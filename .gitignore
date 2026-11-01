@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+test-benchmarks/extreme-dataset/
+test-benchmarks/massive-dataset/
+test-benchmarks/*.wav
+*.wav
+scripts/debug-*.ts
+scripts/check-*.ts
+

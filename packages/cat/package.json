@@ -1,0 +1,30 @@
+{
+  "name": "@pethertz/cat",
+  "version": "0.1.0",
+  "description": "Feline bioacoustic vocalization interpreter for PetHertz",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@pethertz/core": "^0.1.0"
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "keywords": [
+    "cat-translator",
+    "cat-meow",
+    "feline-bioacoustics",
+    "pethertz"
+  ],
+  "author": "PetHertz Open Source Contributors",
+  "license": "MIT"
+}
+

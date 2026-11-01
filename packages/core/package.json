@@ -1,0 +1,29 @@
+{
+  "name": "@pethertz/core",
+  "version": "0.1.0",
+  "description": "Core DSP and bioacoustic signal processing engine for PetHertz",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "keywords": [
+    "bioacoustics",
+    "dsp",
+    "pitch-detection",
+    "animal-audio",
+    "yin-algorithm",
+    "pethertz"
+  ],
+  "author": "PetHertz Open Source Contributors",
+  "license": "MIT"
+}
+

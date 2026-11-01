@@ -1,0 +1,27 @@
+{
+  "name": "@pethertz/cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for PetHertz pet bioacoustics interpretation",
+  "type": "module",
+  "bin": {
+    "pethertz": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "types": "./dist/cli.d.ts",
+  "dependencies": {
+    "@pethertz/cat": "^0.1.0",
+    "@pethertz/core": "^0.1.0",
+    "@pethertz/dog": "^0.1.0"
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "keywords": [
+    "pethertz-cli",
+    "pet-translator-cli",
+    "bioacoustics-cli"
+  ],
+  "author": "PetHertz Open Source Contributors",
+  "license": "MIT"
+}
+
