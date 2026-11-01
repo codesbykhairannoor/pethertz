@@ -47,11 +47,25 @@ export class PetHertz<TIntent = string, TVocalization = string> {
     options?: Partial<AnalyzeOptions>
   ): Promise<PetAnalysisResult<TIntent, TVocalization>> {
     const sampleRate = options?.sampleRate ?? this.defaultSampleRate;
-    const minFreq = options?.minFrequency ?? 20;
+    const minFreq =
+      options?.minFrequency ?? (this.interpreter.species === 'dog' ? 65 : 20);
     const maxFreq = options?.maxFrequency ?? 3500;
 
-    const dataArray =
+    const rawArray =
       audioData instanceof Float32Array ? audioData : new Float32Array(audioData);
+
+    // 0. DC Offset Removal (High-Pass Filter at ~15 Hz)
+    // Eliminates electrical hum, microphone drift, and DC bias (prevents flat DC from being mistaken as purr)
+    const dataArray = new Float32Array(rawArray.length);
+    const R = 0.998;
+    let prevX = rawArray[0] ?? 0;
+    let prevY = 0;
+    for (let i = 0; i < rawArray.length; i++) {
+      const x = rawArray[i] ?? 0;
+      prevY = x - prevX + R * prevY;
+      prevX = x;
+      dataArray[i] = prevY;
+    }
 
     // 1. Adaptive Dynamic Segmentation & Voice Activity Detection
     const segmentation = segmentVocalizations(dataArray, {
@@ -65,7 +79,11 @@ export class PetHertz<TIntent = string, TVocalization = string> {
     const spectralCentroidHz = calculateSpectralCentroid(dataArray, sampleRate);
 
     // 3. Sliding-window Pitch Trajectory Extraction (YIN) with Energy-Weighting
-    const windowSize = Math.min(2048, Math.max(512, Math.floor(sampleRate * 0.05)));
+    // For low-pitch animal vocalizations (cat purr 20-70 Hz), allocate a window capable of holding 2 full periods of 20 Hz
+    const windowSize =
+      minFreq <= 35 && dataArray.length >= 4096
+        ? Math.min(8192, Math.max(1024, Math.floor(sampleRate * 0.12)))
+        : Math.min(2048, Math.max(512, Math.floor(sampleRate * 0.05)));
     const hopSize = Math.floor(windowSize / 2);
     const pitchTrajectory: number[] = [];
     let sumWeightedF0 = 0;

@@ -64,11 +64,23 @@ async function runMassiveStressTest() {
       subCategory = match ? match[1]! : 'general_noise';
     }
 
-    // Use dog engine for dog audio, cat engine for cat audio and noise
-    const activeEngine = expectedCategory === 'dog' ? dogEngine : catEngine;
-    const res = await activeEngine.analyze(decoded.audioData, { sampleRate: decoded.sampleRate });
+    let isAnimal = false;
+    let res: any;
 
-    const isAnimal = res.isAnimalVocalization;
+    if (expectedCategory === 'noise') {
+      // Symmetrical Hard Negative Evaluation: Both engines are tested!
+      // A noise is ONLY a true negative if NEITHER catEngine NOR dogEngine falsely detects it as a pet.
+      const catRes = await catEngine.analyze(decoded.audioData, { sampleRate: decoded.sampleRate });
+      const dogRes = await dogEngine.analyze(decoded.audioData, { sampleRate: decoded.sampleRate });
+
+      isAnimal = catRes.isAnimalVocalization || dogRes.isAnimalVocalization;
+      res = isAnimal ? (catRes.isAnimalVocalization ? catRes : dogRes) : catRes;
+    } else {
+      const activeEngine = expectedCategory === 'dog' ? dogEngine : catEngine;
+      res = await activeEngine.analyze(decoded.audioData, { sampleRate: decoded.sampleRate });
+      isAnimal = res.isAnimalVocalization;
+    }
+
     const gatekeeper = res.acousticMetrics.gatekeeper;
     const reason = gatekeeper?.rejectionReason;
 

@@ -30,16 +30,15 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       burstCount,
     } = features;
 
-    // 1. Purr Detection (Low frequency rumble 20 - 70 Hz with low centroid < 650 Hz)
-    const isLowPitch = f0 >= 20 && f0 <= 70 && features.spectralCentroidHz < 650;
-    const isLowCentroidRumble =
-      f0 === 0 &&
-      features.spectralCentroidHz > 0 &&
-      features.spectralCentroidHz <= 250 &&
-      zcr < 0.15 &&
+    // 1. Purr Detection (Low frequency neural laryngeal rumble 20 - 75 Hz with low centroid < 650 Hz)
+    // Grounded in YIN pitch tracking of 20-70 Hz glottal oscillation
+    const isPurr =
+      f0 >= 20 &&
+      f0 <= 75 &&
+      features.spectralCentroidHz < 650 &&
       rms > 0.005;
 
-    if (isLowPitch || isLowCentroidRumble) {
+    if (isPurr) {
       return {
         species: 'cat',
         vocalization: 'purr',
@@ -59,10 +58,10 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       };
     }
 
-    // 1b. Feline Bioacoustic Dead-Zone Check (70 Hz - 180 Hz)
-    // Domestic cat vocal cords are 3-5mm and physically cannot produce sustained phonation between 70 Hz and 180 Hz.
-    // Tones in this band are human snoring, vehicle motors, or appliance hums.
-    if (f0 > 70 && f0 < 180) {
+    // 1b. Feline Bioacoustic Dead-Zone Check (75 Hz - 240 Hz)
+    // Domestic cat vocal cords are 3-5mm and physically cannot produce sustained phonation between 75 Hz and 240 Hz.
+    // Tones in this band are human snoring, coughing, vehicle motors, or appliance hums.
+    if (f0 > 75 && f0 < 240) {
       return {
         species: 'unknown',
         vocalization: 'unknown' as any,
@@ -176,8 +175,14 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       };
     }
 
-    // 2. Hissing Detection (Turbulent broadband noise without voiced pitch)
-    if (zcr > 0.22 && pitchConfidence < 0.35) {
+    // 2. Hissing Detection (Turbulent broadband noise: high ZCR, atonal, moderate duration)
+    const isBiologicalHiss =
+      zcr >= 0.20 &&
+      durationMs >= 150 &&
+      pitchConfidence < 0.40 &&
+      (features.spectralCentroidHz === undefined || features.spectralCentroidHz >= 2000);
+
+    if (isBiologicalHiss) {
       return {
         species: 'cat',
         vocalization: 'hiss',
@@ -286,7 +291,8 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       isPlausibleMeowTimbre &&
       f0 >= 450 &&
       durationMs >= 350 &&
-      durationMs <= 1200;
+      durationMs <= 1200 &&
+      burstCount <= 3;
 
     if (isRisingMeow || isDurationMeow) {
       return {
@@ -335,10 +341,11 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       };
     }
 
-    // Default Fallback: Only classify as meow if contour is non-chaotic and F0 >= 200 Hz and duration <= 2000ms
+    // Default Fallback: Only classify as meow if contour is non-chaotic and F0 >= 240 Hz and duration <= 2000ms
     if (
       isPlausibleMeowTimbre &&
-      f0 >= 200 &&
+      f0 >= 240 &&
+      burstCount <= 3 &&
       durationMs <= 2000 &&
       intonationContour !== 'fluctuating' &&
       intonationContour !== 'atonal'
@@ -391,6 +398,8 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
     if (
       features.gatekeeper?.isAnimalVocalization &&
       isPlausibleMeowTimbre &&
+      f0 >= 240 &&
+      burstCount <= 3 &&
       intonationContour !== 'atonal' &&
       intonationContour !== 'fluctuating'
     ) {

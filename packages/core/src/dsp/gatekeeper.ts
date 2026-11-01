@@ -180,11 +180,11 @@ export function validateAnimalVocalization(
   // Sustained glottal oscillation vs unvoiced ambient noise or chaotic pulses
   // =========================================================================
 
-  if (pitchConfidence >= 0.70) {
+  if (pitchConfidence >= 0.60) {
     sVoicing += 0.25;
-  } else if (pitchConfidence >= 0.45) {
+  } else if (pitchConfidence >= 0.40) {
     sVoicing += 0.10;
-  } else if (pitchConfidence < 0.30) {
+  } else if (pitchConfidence < 0.25) {
     sVoicing -= 0.30;
   }
 
@@ -204,10 +204,16 @@ export function validateAnimalVocalization(
     sVoicing -= 0.35;
   }
 
-  // Canine growl phonation (70-250 Hz in short/medium duration <= 2500ms - Pongrácz 2005)
-  if (f0 >= 70 && f0 <= 250 && durationMs <= 2500) {
-    sVoicing += 0.15;
-    sTemporal += 0.10;
+  // Canine growl phonation: authentic canine growls in 70-250 Hz with duration <= 2200ms
+  if (
+    f0 >= 70 &&
+    f0 <= 250 &&
+    durationMs <= 2200 &&
+    rms > 0.02
+  ) {
+    sVoicing += 0.20;
+    sTemporal += 0.15;
+    sSpectral += 0.15;
   }
 
   // Engine combustion / low mechanical drone: 20-70 Hz with centroid > 650 Hz (Purr is strictly < 650 Hz)
@@ -215,10 +221,11 @@ export function validateAnimalVocalization(
     sVoicing -= 0.45;
   }
 
-  // Prolonged human snoring or appliance hum in 70 - 180 Hz band (duration > 2500ms)
-  // Short vocalizations in this band (< 2500ms) are valid canine growls (Pongrácz 2005)
-  if (f0 > 70 && f0 < 180 && durationMs > 2500) {
-    sVoicing -= 0.30;
+  // Prolonged human snoring or appliance drone in 70 - 180 Hz band (duration > 2000ms)
+  if (f0 > 70 && f0 < 180 && durationMs > 2000) {
+    sVoicing -= 0.40;
+    sTemporal -= 0.40;
+    sSpectral -= 0.30;
   }
 
   // Human sneezes / violent atonal treble friction: Centroid > 3600 Hz while F0 < 600 Hz
@@ -226,9 +233,14 @@ export function validateAnimalVocalization(
     sVoicing -= 0.35;
   }
 
-  // Mechanical clock ticking / fast pulses (burstCount >= 7 in < 2000ms with chaotic jitter > 0.50)
-  if (burstCount >= 7 && durationMs < 2000 && jitter > 0.50) {
-    sVoicing -= 0.45;
+  // Mechanical clock ticking / fast pulses (burstCount >= 7 in < 2000ms with chaotic jitter > 0.50, or short click < 100ms)
+  if (
+    (burstCount >= 7 && durationMs < 2000 && jitter > 0.50) ||
+    (durationMs < 100 && (f0 === 0 || jitter > 0.50))
+  ) {
+    sVoicing -= 0.55;
+    sTemporal -= 0.55;
+    sSpectral -= 0.40;
   }
 
   const isCanineVtl =
@@ -280,11 +292,20 @@ export function validateAnimalVocalization(
     sTemporal -= 0.40;
   }
 
-  // Emergency Sirens / Electronic Sweeps: prolonged continuous tone > 3500ms with F0 > 450 Hz and low burst count
-  if (durationMs > 3500 && f0 > 450 && burstCount <= 2 && jitter < 0.20) {
-    sSpectral -= 0.60;
+  // Emergency Sirens / Electronic Sweeps: prolonged continuous tone (> 3200ms with F0 > 450 Hz and low synthetic jitter < 0.06)
+  if (durationMs > 3200 && f0 > 450 && jitter < 0.06) {
+    sSpectral -= 0.70;
     sTemporal -= 0.70;
-    sVoicing -= 0.35;
+    sVoicing -= 0.50;
+  }
+
+  // Pure digital white noise (flatness > 0.40 or ZCR > 0.45 with no voiced pitch)
+  if (
+    (spectralFlatness !== undefined && spectralFlatness > 0.40 && (f0 === 0 || pitchConfidence < 0.35)) ||
+    (zcr > 0.45 && pitchConfidence < 0.30)
+  ) {
+    sVoicing -= 0.60;
+    sSpectral -= 0.60;
   }
 
   // Wiener Spectral Flatness: pure synthetic delta tones vs natural harmonic resonance
@@ -308,6 +329,9 @@ export function validateAnimalVocalization(
     (spectralFlatness === undefined || spectralFlatness < 0.005)
   ) {
     sSpectral -= 0.45; // Unnatural zero-jitter electronic pure sine generator
+  } else if (f0 > 0 && jitter > 0.50) {
+    sSpectral -= 0.60; // Erratic impulse noise / chaotic jitter (clock ticks, horns)
+    sVoicing -= 0.40;
   } else if (jitter > 0.40 && spectralCentroidHz > 1800) {
     sSpectral -= 0.50; // Human cough, sneeze, or atonal friction
     sVoicing -= 0.30;
@@ -327,9 +351,19 @@ export function validateAnimalVocalization(
     sTemporal -= 0.40; // Endless stationary sound
   }
 
-  // Emergency Sirens / Electronic Sweeps: prolonged continuous tone > 3500ms with F0 > 450 Hz and low burst count
-  if (durationMs > 3500 && f0 > 450 && burstCount <= 2 && jitter < 0.20) {
+  // Emergency Sirens / Electronic Sweeps: prolonged continuous tone (> 3200ms with F0 > 450 Hz and low synthetic jitter < 0.06)
+  if (durationMs > 3200 && f0 > 450 && jitter < 0.06) {
     sTemporal -= 0.70;
+  }
+
+  // Infant crying repeated sobbing bouts / shrieks (burstCount >= 7 across > 2000ms with high F0)
+  if (
+    (durationMs > 2000 && burstCount >= 7 && f0 > 400) ||
+    (durationMs > 2500 && burstCount >= 5 && f0 > 480)
+  ) {
+    sTemporal -= 0.60;
+    sVoicing -= 0.40;
+    sSpectral -= 0.40;
   }
 
   // Car Horns / Alarms: prolonged tone (> 2800ms) with burstCount <= 2
@@ -424,7 +458,7 @@ export function validateAnimalVocalization(
   };
 
   // Honest 4-way decision thresholds
-  const CONFIRMED_THRESHOLD = 0.58;
+  const CONFIRMED_THRESHOLD = 0.55;
   const UNCERTAIN_THRESHOLD = 0.40;
 
   let status: GatekeeperResult['status'];
