@@ -26,23 +26,39 @@ if (!apiKey) {
   process.exit(1);
 }
 
-// Cuplikan kode esensial agar hemat token (< 2500 tokens input per call)
+// Cuplikan kode esensial terbaru setelah perbaikan (< 3000 tokens input)
 const gatekeeperSnippet = fs.readFileSync('packages/core/src/dsp/gatekeeper.ts', 'utf-8').slice(0, 3500);
-const formantsSnippet = fs.readFileSync('packages/core/src/dsp/formants.ts', 'utf-8').slice(0, 3000);
-const catSnippet = fs.readFileSync('packages/cat/src/CatInterpreter.ts', 'utf-8').slice(0, 3000);
-const dogSnippet = fs.readFileSync('packages/dog/src/DogInterpreter.ts', 'utf-8').slice(0, 3000);
+const formantsSnippet = fs.readFileSync('packages/core/src/dsp/formants.ts', 'utf-8').slice(0, 3200);
+const catSnippet = fs.readFileSync('packages/cat/src/CatInterpreter.ts', 'utf-8').slice(0, 3200);
+const dogSnippet = fs.readFileSync('packages/dog/src/DogInterpreter.ts', 'utf-8').slice(0, 3200);
 
 const prompt = `
 JANGAN BASA-BASI. JANGAN MEMUJI. JANGAN ADA POSITIVITY BIAS.
 Anda adalah Reviewer Bioakustika & Audio DSP Senior dengan standar peer-review IEEE/ACM yang kejam dan sinis.
-Tugas Anda adalah MEMBONGKAR DAN MENYERANG SEMUA CACAT LOGIKA, HALUSINASI, DAN ASUMSI RAPUH dalam kode library TypeScript bernama "PetHertz" berikut.
+Ini adalah AUDIT TAHAP 2 (RE-EVALUATION) setelah kami merombak kode kami berdasarkan kritik keras Anda sebelumnya.
 
-Klaim pengembang: "Library ini zero-dependency, tanpa neural network, berhasil 100% menolak noise ESC-50 (klakson, batuk, bayi, mesin, dengkuran)."
-FAKTA DI UJI STRES KAMI:
-- Noise ESC-50 memang ditolak 50/50 (100% Specificity).
-- TETAPI 19 dari 50 suara hewan asli (anjing & kucing) IKUT TERBUNUH (False Negative 38%, Recall cuma 62%)!
+APA YANG SUDAH KAMI PERBAIKI BERDASARKAN KRITIK ANDA:
+1. FORMANT & VTL:
+   - Jika F0 > 700 Hz, ditandai isHarmonicLocked = true, vtlConfidence = 0.25 (tidak memaksakan vonis VTL).
+   - NaN protection: safeVtl divalidasi ketat terhadap NaN dan nilai tak-hingga.
+   - Ambang VTL manusia dinaikkan ke > 15.5 cm sehingga anjing besar (12-15 cm) tidak lagi terbunuh!
+2. CAT INTERPRETER:
+   - Dead-zone 75-240 Hz dipisah: 75-140 Hz tetap dead-zone (dengkuran manusia), sedangkan 140-240 Hz secara resmi mengenali Cat Agonistic Growl jika VTL <= 8.5 cm dan centroid <= 1200 Hz.
+   - Batas meow dinaikkan dari burstCount <= 3 menjadi burstCount <= 6, dengan toleransi jitter hingga 1.25 pada F0 tinggi.
+   - Sneeze friction manusia ditolak jika centroid > 3200 Hz dan jitter > 0.45.
+3. DOG INTERPRETER:
+   - Batuk manusia disempurnakan dengan kombinasi allometri: VTL > 10.5 cm pada F0 rendah atau centroid > 2200 Hz pada F0 < 300 Hz dengan jitter tinggi.
+   - Clock ticks repetitif ditolak jika burstCount >= 7 dan jitter > 0.65.
+   - Emergency siren diisolasi dengan syarat burstCount <= 2 dan jitter < 0.04.
 
-Berikut cuplikan kode logika kami:
+HASIL BENCHMARK BARU PADA 100 AUDIO DUNIA NYATA (50 Pets vs 50 ESC-50 Hard Negatives):
+- True Positives (Hewan asli terdeteksi): 37 / 50 (Recall naik dari 62% ke 74%, Cat Recall 80%, Dog Recall 68%).
+- True Negatives (Noise ditolak): 50 / 50 (100% Specificity pada 10 kategori: klakson, detak jam, batuk, bayi nangis, mesin, kaca pecah, sirine, bersin, dengkuran, vacuum cleaner).
+- False Positives: 0 (Zero leaks!).
+- F1-Score: 85.06% (Naik signifikan dari 76.54%).
+- Overall Accuracy: 87.00%.
+
+Berikut cuplikan kode terbaru kami:
 
 === 1. FORMANT & VOCAL TRACT LENGTH (LPC LEVINSON-DURBIN) ===
 \`\`\`typescript
@@ -54,23 +70,22 @@ ${formantsSnippet}
 ${gatekeeperSnippet}
 \`\`\`
 
-=== 3. CAT INTERPRETER (DEAD ZONE & MEOW RULES) ===
+=== 3. CAT INTERPRETER (GROWL, REVISED DEAD ZONE & MEOW RULES) ===
 \`\`\`typescript
 ${catSnippet}
 \`\`\`
 
-=== 4. DOG INTERPRETER (GROWL, BARK, WHINE RULES) ===
+=== 4. DOG INTERPRETER (ALLOMETRIC COUGH & REVISED CANINE RULES) ===
 \`\`\`typescript
 ${dogSnippet}
 \`\`\`
 
-PERTANYAAN AUDIT WAJIB DIJAWAB SECARA BRUTAL & TO THE POINT:
-1. Mengapa formula L = c / (2 * Delta F) via LPC Levinson-Durbin itu cacat/halu pada audio nyata (terutama saat F0 kucing > 800 Hz atau pada nada murni)? Apakah ada bug NaN fail-open?
-2. Mengapa 19 suara hewan asli di uji coba kami terbunuh (False Negative)? Tunjukkan baris kode/kondisi if mana saja yang menjadi "mesin pembunuh" hewan asli tersebut!
-3. Sebutkan 3 suara dunia nyata yang PASTI LOLOS sebagai hewan (False Positive) karena kelemahan logika di kode di atas!
-4. Berikan solusinya secara teknis tanpa harus merusak filosofi zero-dependency/edge-native!
+PERTANYAAN AUDIT TAHAP 2 (KRITIK TEKNIS LANJUTAN):
+1. Apakah perbaikan matematika allometri & batas-batas akustik kami di atas sudah valid secara bioakustik komparatif?
+2. Dari 13 audio hewan asli yang masih False Negative (kebanyakan adalah rekaman bersuara sangat pelan atau noise background tinggi), apa batas teoretis yang membuat DSP linier tanpa NN kesulitan menembus Recall > 90%?
+3. Apakah sistem ini sekarang sudah cukup solid dan aman untuk dirilis ke publik (NPM) sebagai "Zero-Dependency Edge Bioacoustic DSP Gatekeeper"? Apa disclaimer teknis paling jujur yang harus kami pasang di README?
 
-Tulis langsung ke inti masalah, tanpa pendahuluan ramah tamah!
+Jawab langsung, tajam, dan teknis!
 `;
 
 async function queryModel(modelId: string, outputFilename: string) {
@@ -84,7 +99,7 @@ async function queryModel(modelId: string, outputFilename: string) {
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'HTTP-Referer': 'https://github.com/codesbykhairannoor/pethertz',
-      'X-Title': 'PetHertz Adversarial Audit',
+      'X-Title': 'PetHertz Adversarial Audit Round 2',
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -121,14 +136,13 @@ async function queryModel(modelId: string, outputFilename: string) {
 }
 
 async function main() {
-  // Model 1: DeepSeek-V3 (Super tajam, brutal, mathematical analysis)
-  await queryModel('deepseek/deepseek-chat', 'AUDIT_DEEPSEEK.md');
+  // Model 1: DeepSeek-V3
+  await queryModel('deepseek/deepseek-chat', 'AUDIT_ROUND2_DEEPSEEK.md');
 
-  // Model 2: Llama 3.3 70B Instruct (Meta's best, rigorous DSP reasoning)
-  await queryModel('meta-llama/llama-3.3-70b-instruct', 'AUDIT_LLAMA33.md');
+  // Model 2: Llama 3.3 70B Instruct
+  await queryModel('meta-llama/llama-3.3-70b-instruct', 'AUDIT_ROUND2_LLAMA33.md');
 
-  console.log('\n🎉 Audit adversarial selesai untuk 2 model OpenRouter!');
+  console.log('\n🎉 Audit adversarial Tahap 2 selesai untuk 2 model OpenRouter!');
 }
 
 main().catch(console.error);
-

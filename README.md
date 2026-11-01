@@ -31,15 +31,39 @@ PetHertz beroperasi 100% offline tanpa ketergantungan API cloud atau model black
 
 ---
 
-## 📊 Hasil Uji Stres Riil (Benchmark 100 Audio Liar & Hard Negatives)
+## 📊 Hasil Uji Stres Simetris Riil (Benchmark 100 Audio Liar & Hard Negatives)
 
-Diuji langsung menggunakan 100 berkas audio dunia nyata (50 hewan asli vs 50 *adversarial mirror pairs* ESC-50: tangisan bayi, batuk, bersin, klakson, sirine, dengkuran):
+Diuji secara ketat dan simetris menggunakan 100 berkas audio dunia nyata (50 hewan asli vs 50 *adversarial mirror pairs* ESC-50: tangisan bayi, batuk, bersin, klakson, sirine, dengkuran, jam dinding, vacuum cleaner, pecahan kaca, mesin diesel):
 
-* **Overall Accuracy:** `98.00%` (98 / 100)
-* **Precision:** `100.00%` (0 False Positive pada seluruh mirror pairs)
-* **Sensitivity / Recall:** `96.00%` (48 / 50 Hewan Asli Terdeteksi - Dog: 100%, Cat: 92%)
+* **Overall Accuracy:** `87.00%` (87 / 100)
+* **Precision:** `100.00%` (0 False Positive / Zero Leaks pada seluruh 50 suara non-hewan)
 * **Specificity:** `100.00%` (50 / 50 Noise Lingkungan & Human Mirror Pairs 100% Tertolak!)
-* **F1-Score:** `97.96%`
+* **Sensitivity / Recall:** `74.00%` (37 / 50 Hewan Asli Terdeteksi — Kucing: 80.0%, Anjing: 68.0%)
+* **F1-Score:** `85.06%`
+
+| Kategori Uji | Dataset / Sumber | Total Sampel | Hasil Evaluasi |
+| :--- | :--- | :---: | :--- |
+| **Noise & Human Hard Negatives** | ESC-50 (tangisan, batuk, bersin, sirine, klakson, jam) | 50 file | **50 / 50 Tertolak (100% TN, 0 FP)** |
+| **Cat Vocalizations** | Kaggle Cat Meow & ESC-50 Cat | 25 file | **20 / 25 Terdeteksi (80.0% TP)** |
+| **Dog Vocalizations** | AudioSet Dog Bark & ESC-50 Dog | 25 file | **17 / 25 Terdeteksi (68.0% TP)** |
+
+---
+
+## ⚠️ Batasan Bioakustik & Technical Disclaimer (Beta Release)
+
+PetHertz dirancang murni berbasis **matematika DSP linier dan allometri bioakustik komparatif** tanpa ketergantungan neural network (NN) berat. Berdasarkan audit teknis AI adversarial (DeepSeek-V3, Llama 3.3, Meta AI), berikut adalah batasan fisik dan operasional sistem:
+
+1. **Cakupan Spesies:**
+   - Dikhususkan untuk **hewan peliharaan pendamping domestik (*Felis catus* & *Canis familiaris*)**.
+   - Tidak mencakup satwa liar eksotis, mamalia air, pengerat mikro ($VTL < 3.5\text{ cm}$), atau primata besar.
+
+2. **Batas Teoretis DSP Linier (Alasan 13 False Negative):**
+   - **Low Signal-to-Noise Ratio ($\text{SNR} < -10\text{ dB}$):** Suara hewan yang sangat pelan atau desisan tertimbun noise lantai ruangan dapat ditolak sebagai *unvoiced ambient noise*.
+   - **Artifak Non-Linear Chaos:** Vokalisasi non-stasioner ekstrim (misal: batuk hairball, choking) yang tidak memiliki formasi harmonik teratur tidak dapat diestimasi oleh pelacak pitch kuasi-periodik.
+   - **Akustik Multipath & Gema:** Ruangan dengan pantulan suara gema ekstrim dapat mengaburkan formasi dispersi formasi vokal ($VTL$).
+
+3. **Filosofi Keamanan Gatekeeper:**
+   - PetHertz memprioritaskan **Zero False Positives (Spesifisitas 100%)**: Sistem sengaja memilih menolak suara ambivalen daripada membiarkan batuk manusia, dengkuran orang tidur, atau alarm jam diterjemahkan secara keliru sebagai suara hewan.
 
 ---
 
