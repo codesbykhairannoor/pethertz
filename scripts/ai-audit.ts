@@ -44,54 +44,47 @@ async function runAiAudit() {
   const engineCode = fs.readFileSync('packages/core/src/engine.ts', 'utf-8');
 
   const auditPrompt = `
-Anda adalah Pakar Bioakustik Senior, Spesialis Audio DSP (Digital Signal Processing), dan Lead Architect Machine Learning.
-Tugas Anda adalah melakukan ADVERSARIAL AUDIT & PEER REVIEW secara kritis, skeptis, dan tanpa kompromi (no sugar-coating) terhadap logika dan algoritma library pet bioacoustics bernama "PetHertz".
+Anda adalah Pakar Bioakustik Senior, Spesialis Audio DSP (Digital Signal Processing), dan Lead Architect Machine Learning yang sangat skeptis, galak, dan tanpa kompromi (no sugar-coating).
+Tugas Anda adalah MEMBANTAH, MENYERANG, DAN MENGULITI KELEMAHAN FATAL dari arsitektur library bioakustika bernama "PetHertz" (zero-dependency pure TypeScript DSP tanpa deep learning neural network).
 
-Proyek ini dibangun murni menggunakan TypeScript (zero-dependency) tanpa model Neural Network eksternal, bertujuan menginterpretasikan vokalisasi kucing dan anjing serta menolak suara lingkungan manusia/mesin.
+Sistem kami mengklaim berhasil menolak 100% noise ESC-50 (klakson, batuk, bayi nangis, sirine, mesin, vacuum), tetapi kami ingin Anda BONGKAR SEMUA CACAT LOGIKA, ASUMSI RAPUH, DAN HALU-NYA!
 
-Berikut adalah kode sumber inti implementasi kami:
+Berikut adalah arsitektur dan formula matematis yang kami gunakan:
 
-=== 1. GATEKEEPER (Penyaring Noise Lingkungan & Suara Manusia) ===
-\`\`\`typescript
-${gatekeeperCode}
-\`\`\`
+1. ESTIMASI NADA DASAR (F0):
+   - YIN algorithm (de Cheveigné & Kawahara 2002) dengan buffer 2048/4096 sampel, parabolic interpolation, dan adaptive threshold 0.10 - 0.15.
+   - Rentang deteksi: 20 Hz (feline purr infrasound) hingga 3500 Hz (whine/squeak).
 
-=== 2. ACOUSTIC ALLOMETRY & FORMANTS (Levinson-Durbin LPC & Vocal Tract Length) ===
-\`\`\`typescript
-${formantsCode}
-\`\`\`
+2. ACOUSTIC ALLOMETRY & VOCAL TRACT LENGTH (VTL):
+   - Menggunakan Linear Predictive Coding (LPC) ordo 12-16 via algoritma Levinson-Durbin.
+   - Formant extraction: mencari akar polinomial LPC yang berada di kuadran frekuensi resonansi vokal.
+   - Estimasi panjang saluran vokal: L = c / (2 * Delta F) di mana c = 35000 cm/s dan Delta F adalah dispersi rata-rata forman.
+   - Klasifikasi:
+     * Faring Manusia: VTL > 14.5 cm atau F1 < 850 Hz pada F0 rendah (< 450 Hz) -> DITOLAK SEBAGAI SUARA MANUSIA.
+     * Kucing Domestik: VTL 3.8 - 6.8 cm, F1 selalu > 950 Hz.
+     * Feline Biological Dead-Zone: F0 antara 75 Hz - 240 Hz DITOLAK (karena pita suara kucing 3-5mm tidak bisa berfonasi di rentang ini).
 
-=== 3. 13-BAND MFCC & SPECTRAL FLATNESS (Davis & Mermelstein 1980) ===
-\`\`\`typescript
-${mfccCode}
-\`\`\`
+3. BIOACOUSTIC GATEKEEPER & HARMONIC SHIELD:
+   - Zero Crossing Rate (ZCR), Spectral Centroid, Wiener Spectral Flatness, Pitch Jitter, Pitch Shimmer, Burst Count, Dynamic Noise Floor (persentil 15).
+   - Penolakan klakson: spectral centroid > 2500 Hz, F0 < 300 Hz, ZCR < 0.03.
+   - Penolakan batuk/tenggorokan manusia: jitter > 0.55 atau VTL > 11 cm.
+   - Penolakan tangisan bayi: durasi > 2200 ms dengan F0 > 450 Hz.
+   - Penolakan dengkuran manusia: F0 70-135 Hz dengan durasi > 1800 ms.
+   - Penolakan detak jam: burstCount >= 7 dengan pitchConfidence < 0.35.
 
-=== 4. CAT INTERPRETER (Susanne Schötz 2023 Rules & Dead-Zone) ===
-\`\`\`typescript
-${catCode}
-\`\`\`
-
-=== 5. DOG INTERPRETER (Pongrácz Canine Rules & Valence-Arousal) ===
-\`\`\`typescript
-${dogCode}
-\`\`\`
-
-=== 6. CORE ENGINE ORCHESTRATOR ===
-\`\`\`typescript
-${engineCode}
-\`\`\`
+4. EMOSI & INTENSI:
+   - Bukan kategori diskrit, melainkan 2D Affective Space (Valence [-1, 1], Arousal [0, 1], Urgency) berbasis kontur intonasi F0 (rising, falling, flat, arch) berdasarkan riset Susanne Schötz 2023 dan Péter Pongrácz.
 
 ----------------------------------------------------------------------
-PERTANYAAN AUDIT UTAMA YANG HARUS ANDA JAWAB DENGAN TAJAM & MENDALAM:
+TUGAS ADVERSARIAL ANDA (KRITIK SEPEDAS MUNGKIN & AJAK BERANTEM SECARA TEKNIS):
 
-1. Di mana saja letak cacat logika, asumsi yang terlalu kaku (brittle heuristics), atau kelemahan fatal dalam arsitektur aturan di atas?
-2. Apakah formula fisika Formant Dispersion (Delta F) dan Vocal Tract Length (L = c / (2 * Delta F)) via LPC Levinson-Durbin akurat untuk kucing dan anjing, atau ada potensi jebakan/kegagalan saat diaplikasikan ke audio di dunia nyata (misal saat F0 tinggi atau rekaman bising)?
-3. Sebutkan minimal 5 skenario audio dunia nyata yang paling berpotensi "menipu" sistem ini:
-   - Skenario yang berpotensi lolos sebagai hewan padahal bukan (False Positive).
-   - Skenario suara hewan asli yang berpotensi salah ditolak sebagai noise (False Negative).
-4. Bagaimana mitigasi dan rekomendasi arsitektur perbaikannya agar library ini benar-benar tangguh untuk produksi dan rilis ke publik (NPM)?
+1. Mengapa formula LPC Levinson-Durbin L = c / (2 * Delta F) bisa menjadi BENCANA di rekaman smartphone nyata (SNR rendah, background noise, mikrofon terdistorsi, atau pitch tinggi F0 > 800 Hz)?
+2. Di mana saja letak "BRITTLE HEURISTICS" (aturan ambang batas kaku) yang sangat mudah dieksploitasi oleh suara non-hewan dunia nyata? Berikan minimal 5 contoh suara spesifik yang PASTI AKAN MENGECOH sistem ini (False Positive).
+3. Mengapa di stress test kami, 19 dari 50 audio hewan asli salah ditolak (False Negative)? Cacat logika apa dalam filter kami yang "membunuh" suara hewan asli?
+4. Apa halusinasi terbesar dari pengembang yang mengira DSP heuristik murni bisa menggantikan Neural Network di era 2026?
+5. Berikan rekomendasi mitigasi arsitektural yang radikal dan konkret!
 
-Berikan jawaban terstruktur, teknis, berbasis matematika sinyal dan literatur bioakustik resmi!
+Jawab secara komprehensif, berbasis fisika akustik, matematika sinyal, dan literatur bioakustik resmi!
 `;
 
   const startTime = Date.now();
@@ -106,15 +99,15 @@ Berikan jawaban terstruktur, teknis, berbasis matematika sinyal dan literatur bi
       messages: [
         {
           role: 'system',
-          content: 'Anda adalah Reviewer Bioakustik & Audio DSP Tingkat PhD. Berikan evaluasi kritis, ilmiah, objektif, dan tanpa ampun. Tunjukkan di mana saja kelemahan tersembunyi, celah logika, dan potensi salah deteksi.'
+          content: 'Anda adalah Reviewer Bioakustik & Audio DSP Tingkat PhD yang sangat kritis, tajam, skeptis, dan agresif dalam membongkar celah logika sistem.'
         },
         {
           role: 'user',
           content: auditPrompt
         }
       ],
-      temperature: 0.2,
-      max_tokens: 8192,
+      temperature: 0.3,
+      max_tokens: 16384,
     })
   });
 
@@ -126,8 +119,11 @@ Berikan jawaban terstruktur, teknis, berbasis matematika sinyal dan literatur bi
 
   const data = await res.json();
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log('Usage:', data.usage);
+  console.log('Finish reason:', data.choices?.[0]?.finish_reason);
+
   const choice = data.choices?.[0];
-  const auditResult = choice?.message?.content || choice?.message?.reasoning_content || 'Tidak ada teks respon yang diterima.';
+  const auditResult = choice?.message?.content || choice?.message?.reasoning_content || JSON.stringify(choice?.message) || 'Tidak ada teks respon yang diterima.';
 
   console.log(`\n✅ Respon Audit Diterima dalam ${elapsed} detik!\n`);
   console.log('======================================================================');

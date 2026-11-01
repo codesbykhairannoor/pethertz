@@ -48,11 +48,11 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
     // =========================================================================
 
     // 1a. Adult & Adolescent Human Phonation Discrimination (Acoustic Allometry)
-    // Long human VTL (> 14.5 cm) with lower fundamental frequency (f0 < 450 Hz) or human vowel resonance
+    // Long human VTL (> 15.0 cm) with lower fundamental frequency (f0 < 450 Hz) or human vowel resonance
     const isHumanPhonation =
       f0 < 450 &&
-      ((vtl > 14.5 && features.morphologicalCategory === 'human_or_large_mammal') ||
-        (f1 > 0 && f1 < 850 && vtl > 9.0));
+      ((vtl > 15.5 && features.morphologicalCategory === 'human_or_large_mammal') ||
+        (f1 > 0 && f1 < 800 && vtl > 15.0));
 
     if (isHumanPhonation) {
       return {
@@ -64,18 +64,23 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Karakteristik resonansi vokal (F1 < 850 Hz atau VTL > 14.5 cm pada F0 rendah) adalah anatomi saluran vokal manusia (batuk/percakapan/dengkuran), bukan anjing.',
+          'Karakteristik resonansi vokal (F1 < 800 Hz atau VTL > 15.0 cm pada F0 rendah) adalah anatomi saluran vokal manusia (batuk/percakapan/dengkuran), bukan anjing.',
         actionRecommendation:
           'Tidak ada tindakan diperlukan. Sinyal berasal dari suara saluran napas/vokal manusia.',
       };
     }
 
-    // 1b. Human coughing / throat clearing: chaotic jitter > 0.55 or adult human vocal tract
-    if (
-      jitter > 0.55 ||
-      (f0 < 450 && f1 > 0 && f1 < 850 && vtl > 9.0) ||
-      (vtl > 11.0 && f0 > 600 && durationMs < 1000)
-    ) {
+    // 1b. Human coughing / throat clearing:
+    // Adult human cough bouts exhibit adult vocal tract resonance (VTL > 10.5 cm) combined with elevated pitch jitter (> 0.45),
+    // prolonged throat clearing in the adult male F0 range (140-250 Hz, duration > 1200ms),
+    // or violent hacking friction (low F0 < 300 Hz with high centroid > 2200 Hz and high jitter).
+    const isHumanCough =
+      (f0 < 800 && vtl > 10.5 && jitter > 0.45) ||
+      (f0 >= 140 && f0 <= 250 && durationMs > 1200 && burstCount <= 2) ||
+      (f0 < 300 && centroid > 2200 && jitter > 0.45) ||
+      (jitter > 0.70 && vtl > 13.0 && durationMs < 1500);
+
+    if (isHumanCough) {
       return {
         species: 'non-pet',
         vocalization: 'unknown',
@@ -85,14 +90,19 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal terdeteksi sebagai suara batuk atau pembersihan tenggorokan manusia (resonansi faring F1 < 850 Hz pada VTL manusia), bukan suara anjing.',
+          'Sinyal terdeteksi sebagai suara batuk atau pembersihan tenggorokan manusia (resonansi saluran vokal manusia pada F0 rendah), bukan suara anjing.',
         actionRecommendation:
           'Tidak ada tindakan diperlukan. Sinyal berasal dari batuk/suara pernapasan manusia.',
       };
     }
 
-    // 1c. Human sneezing / treble friction (violent friction with centroid > 5000 Hz and ZCR > 0.10 on low-mid F0 < 600 Hz)
-    if (centroid > 5000 && zcr > 0.10 && f0 > 0 && f0 < 600) {
+    // 1c. Human sneezing / treble friction (violent friction with centroid > 3200 Hz and high jitter, or low human vowel F1)
+    const isHumanSneeze =
+      (centroid > 4800 && zcr > 0.08 && f0 > 0 && f0 < 600) ||
+      (centroid > 3200 && jitter > 0.45 && durationMs < 1200) ||
+      (f1 > 0 && f1 <= 650 && f0 > 350 && durationMs > 1200);
+
+    if (isHumanSneeze) {
       return {
         species: 'non-pet',
         vocalization: 'unknown',
@@ -108,8 +118,20 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
       };
     }
 
-    // 1d. Infant crying & emergency sirens (continuous high-pitch tone > 2200ms with f0 > 450 Hz)
-    if (durationMs > 2200 && f0 > 450) {
+    // 1d. Infant crying & emergency sirens:
+    // Sirens: pure synthetic pitch (jitter < 0.04 or spectralFlatness < 0.002) with duration > 2800ms.
+    // Infant crying: prolonged high pitch (> 3000ms) with piercing high centroid > 3200 Hz.
+    const isElectronicSiren =
+      durationMs > 2800 &&
+      f0 > 450 &&
+      burstCount <= 2 &&
+      (jitter < 0.04 || (features.spectralFlatness !== undefined && features.spectralFlatness < 0.002));
+    const isProlongedInfantCry =
+      durationMs > 3000 &&
+      f0 > 450 &&
+      centroid > 3200;
+
+    if (isElectronicSiren || isProlongedInfantCry) {
       return {
         species: 'non-pet',
         vocalization: 'unknown',
@@ -119,7 +141,7 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: -0.5, arousal: 0.8, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal bernada tinggi berkepanjangan (> 2.2 detik) terdeteksi sebagai tangisan bayi manusia atau sirine buatan, bukan gonggongan anjing.',
+          'Sinyal bernada tinggi berkepanjangan terdeteksi sebagai tangisan bayi manusia atau sirine buatan, bukan gonggongan anjing.',
         actionRecommendation:
           'Tidak ada tindakan diperlukan. Sinyal berasal dari suara non-hewan.',
       };
@@ -172,7 +194,7 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
     // 1g. Clock ticking / mechanical impulses (ultra-short click < 100ms or unvoiced high burst count without dog phonation)
     if (
       (durationMs < 100 && (f0 === 0 || jitter > 0.45)) ||
-      (burstCount >= 7 && (f0 === 0 || pitchConfidence < 0.35 || (f0 < 200 && jitter > 0.40)))
+      (burstCount >= 7 && (f0 === 0 || pitchConfidence < 0.35 || jitter > 0.65 || (f0 < 200 && jitter > 0.40)))
     ) {
       return {
         species: 'non-pet',

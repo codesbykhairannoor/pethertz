@@ -30,6 +30,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       burstCount,
     } = features;
 
+    const vtl = features.estimatedVocalTractLengthCm ?? 0;
+    const f1 = features.formants?.[0] ?? 0;
+
     // 1. Purr Detection (Low frequency neural laryngeal rumble 20 - 75 Hz with low centroid < 650 Hz)
     // Grounded in YIN pitch tracking of 20-70 Hz glottal oscillation
     const isPurr =
@@ -58,14 +61,43 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       };
     }
 
-    // 1b. Feline Bioacoustic Dead-Zone Check (75 Hz - 240 Hz)
-    // Domestic cat vocal cords are 3-5mm and physically cannot produce sustained phonation between 75 Hz and 240 Hz.
-    // Tones in this band are human snoring, coughing, vehicle motors, or appliance hums.
+    // 1b. Feline Bioacoustic Phonation & Agonistic Growl (75 Hz - 240 Hz)
+    // Domestic cat vocal cords are 3-5mm.
+    // - 75 Hz to 140 Hz is the non-phonatory biological dead-zone for domestic cats (human male snoring, appliance hum).
+    // - 140 Hz to 240 Hz occurs during authentic agonistic growls (defensive low-frequency warnings with low centroid < 1200 Hz).
     if (f0 > 75 && f0 < 240) {
+      const isCatGrowl =
+        f0 >= 140 &&
+        durationMs >= 300 &&
+        durationMs <= 1800 &&
+        features.spectralCentroidHz <= 1200 &&
+        vtl <= 8.5;
+
+      if (isCatGrowl) {
+        return {
+          species: 'cat',
+          vocalization: 'growl' as any,
+          intent: 'defense_warning',
+          confidence: 0.86,
+          isAnimalVocalization: true,
+          affectiveDimensions: {
+            valence: -0.75,
+            arousal: 0.70,
+            urgency: 'high',
+          },
+          acousticMetrics: features,
+          humanExplanation:
+            'Suara geraman (growl) kucing terdeteksi (frekuensi 140-240 Hz dengan resonansi tubuh kecil). Menandakan peringatan defensif atau ancaman wilayah.',
+          actionRecommendation:
+            'Jaga jarak dari kucing, jangan memprovokasi atau mendekati secara mendadak.',
+        };
+      }
+
+      // Any sound in 75-140 Hz (or outside authentic growl parameters) is human snoring, coughing, or motor hum
       return {
         species: 'unknown',
         vocalization: 'unknown' as any,
-        intent: 'distress_isolation' as any,
+        intent: 'ambient_or_artificial_sound' as any,
         confidence: 0,
         isAnimalVocalization: false,
         affectiveDimensions: {
@@ -75,7 +107,7 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Frekuensi sinyal (70 - 180 Hz) berada di zona non-fonatori kucing (dead zone biologis). Suara ini berasal dari dengkuran manusia atau dengung motor listrik.',
+          'Sinyal frekuensi rendah (75 - 240 Hz) berada di zona non-fonatori kucing. Suara berasal dari dengkuran/batuk manusia atau dengung motor listrik.',
         actionRecommendation:
           'Tidak ada tindakan diperlukan. Sinyal bukan suara kucing.',
       };
@@ -83,14 +115,11 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
 
     // 1c. Adult & Adolescent Human Phonation Discrimination (Acoustic Allometry)
     // Domestic cat pharynx/vocal tract length is 3.8 - 6.8 cm; lowest formant F1 is always > 950 Hz.
-    // Signals with low fundamental frequency (F0 < 450 Hz) and either adult human VTL (> 14.0 cm)
-    // or human-scale lowest formant (F1 < 850 Hz with VTL > 9.0 cm) are human speech/cough/sneezes.
-    const vtl = features.estimatedVocalTractLengthCm ?? 0;
-    const f1 = features.formants?.[0] ?? 0;
+    // Signals with fundamental frequency (F0 < 550 Hz) and non-feline vocal tract (VTL > 11.0 cm)
+    // or human-scale lowest formant (F1 < 850 Hz with VTL > 8.0 cm) are human speech/cough/sneezes.
     const isHumanVtlAndFormant =
-      f0 < 450 &&
-      ((vtl > 14.0 && features.morphologicalCategory === 'human_or_large_mammal') ||
-        (f1 > 0 && f1 < 850 && vtl > 9.0));
+      (f0 < 550 && vtl > 11.0) ||
+      (f1 > 0 && f1 < 850 && vtl > 8.0);
 
     if (isHumanVtlAndFormant) {
       return {
@@ -133,8 +162,11 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       };
     }
 
-    // 1e. Human sneeze whistle / ultrasonic squeak (F0 > 2000 Hz with centroid > 3500 Hz)
-    if (f0 > 2000 && features.spectralCentroidHz > 3500) {
+    // 1e. Human sneeze friction / violent nasal burst (Centroid > 3200 Hz with elevated jitter > 0.45 or F0 > 2000 Hz)
+    if (
+      (features.spectralCentroidHz > 3200 && (features.pitchJitter ?? 0) > 0.45 && durationMs < 1200) ||
+      (f0 > 2000 && features.spectralCentroidHz > 3500)
+    ) {
       return {
         species: 'non-pet',
         vocalization: 'non_animal_sound' as any,
@@ -245,19 +277,22 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
     }
 
     // Plausible Feline Meow Timbre Filter:
-    // Feline vocal folds cannot produce >50% chaotic pitch jitter or >5000 Hz centroid in a tonal call
+    // Natural cat meows can have elevated jitter (>50%) when pitch is high (>700 Hz) due to vocal fry or quantization,
+    // or when validated by Gatekeeper as an authentic animal call.
+    const maxAllowedJitter =
+      f0 > 700 || features.gatekeeper?.status === 'confirmed_pet' ? 1.25 : 0.55;
     const isPlausibleMeowTimbre =
-      (features.pitchJitter ?? 0) <= 0.50 &&
-      features.spectralCentroidHz <= 5000 &&
-      !((features.pitchJitter ?? 0) === 0 && durationMs > 500);
+      (features.pitchJitter ?? 0) <= maxAllowedJitter &&
+      features.spectralCentroidHz <= 5500 &&
+      !((features.pitchJitter ?? 0) === 0 && durationMs > 500 && (features.spectralFlatness ?? 0) < 0.005);
 
     // 5. Short Greeting / Trill
     if (
       durationMs < 400 &&
       features.spectralCentroidHz <= 5000 &&
       isPlausibleMeowTimbre &&
-      vtl <= 8.0 &&
-      (intonationContour === 'rising' || (f0 >= 400 && intonationContour !== 'atonal' && intonationContour !== 'falling'))
+      vtl <= 9.0 &&
+      (intonationContour === 'rising' || (f0 >= 300 && intonationContour !== 'atonal' && intonationContour !== 'falling'))
     ) {
       return {
         species: 'cat',
@@ -284,15 +319,15 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       intonationContour === 'rising' &&
       durationMs >= 200 &&
       durationMs <= 1800 &&
-      burstCount <= 3 &&
+      burstCount <= 6 &&
       f0 >= 200 &&
       f0 <= 1600;
     const isDurationMeow =
       isPlausibleMeowTimbre &&
-      f0 >= 450 &&
+      f0 >= 300 &&
       durationMs >= 350 &&
-      durationMs <= 1200 &&
-      burstCount <= 3;
+      durationMs <= 1500 &&
+      burstCount <= 6;
 
     if (isRisingMeow || isDurationMeow) {
       return {
@@ -317,9 +352,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
     // 7. Distress / Isolation Meow (Susanne Schötz 2023 - Falling F0 contour)
     if (
       isPlausibleMeowTimbre &&
-      (intonationContour === 'falling' || durationMs > 1100) &&
-      durationMs <= 2200 &&
-      burstCount <= 3 &&
+      (intonationContour === 'falling' || durationMs > 900) &&
+      durationMs <= 2400 &&
+      burstCount <= 6 &&
       f0 >= 200
     ) {
       return {
@@ -341,12 +376,12 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       };
     }
 
-    // Default Fallback: Only classify as meow if contour is non-chaotic and F0 >= 240 Hz and duration <= 2000ms
+    // Default Fallback: Only classify as meow if contour is non-chaotic and F0 >= 200 Hz and duration <= 2200ms
     if (
       isPlausibleMeowTimbre &&
-      f0 >= 240 &&
-      burstCount <= 3 &&
-      durationMs <= 2000 &&
+      f0 >= 200 &&
+      burstCount <= 6 &&
+      durationMs <= 2200 &&
       intonationContour !== 'fluctuating' &&
       intonationContour !== 'atonal'
     ) {
@@ -398,10 +433,8 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
     if (
       features.gatekeeper?.isAnimalVocalization &&
       isPlausibleMeowTimbre &&
-      f0 >= 240 &&
-      burstCount <= 3 &&
-      intonationContour !== 'atonal' &&
-      intonationContour !== 'fluctuating'
+      burstCount <= 7 &&
+      intonationContour !== 'atonal'
     ) {
       return {
         species: 'cat',

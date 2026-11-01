@@ -173,42 +173,50 @@ export function estimateVocalTractDimensions(
   const estimatedVocalTractLengthCm =
     formantDispersionHz > 0 ? Math.round((34400 / (2 * formantDispersionHz)) * 10) / 10 : 0;
 
-  // Check for high F0 harmonic locking hazard (flagged by Meta AI audit)
-  const isHarmonicLocked = f0Hint !== undefined && f0Hint > 600;
+  // Check for high F0 harmonic locking hazard (flagged by Meta AI & DeepSeek audit)
+  // When F0 > 700 Hz, LPC picks harmonics rather than true vocal tract formants
+  const isHarmonicLocked = f0Hint !== undefined && f0Hint > 700;
 
   // Calculate probabilistic confidence and realistic anatomical range
   let vtlConfidence = 0.85;
   if (isHarmonicLocked) {
-    vtlConfidence = 0.4; // High F0 causes LPC to lock on individual harmonics
+    vtlConfidence = 0.25; // F0 harmonic undersampling: VTL is physically uncomputable
   } else if (dispersionCount < 2) {
-    vtlConfidence = 0.5;
+    vtlConfidence = 0.40;
   }
 
-  const minVtl = estimatedVocalTractLengthCm > 0
-    ? Math.round(estimatedVocalTractLengthCm * 0.8 * 10) / 10
+  // Safe VTL calculation with NaN protection
+  let safeVtl = estimatedVocalTractLengthCm;
+  if (isNaN(safeVtl) || !isFinite(safeVtl) || safeVtl < 0) {
+    safeVtl = 0;
+  }
+
+  const minVtl = safeVtl > 0
+    ? Math.round(safeVtl * 0.8 * 10) / 10
     : 0;
-  const maxVtl = estimatedVocalTractLengthCm > 0
-    ? Math.round(estimatedVocalTractLengthCm * 1.2 * 10) / 10
+  const maxVtl = safeVtl > 0
+    ? Math.round(safeVtl * 1.2 * 10) / 10
     : 0;
 
   // Classify based on anatomical vocal tract length
+  // Only classify as human if NOT harmonic locked and confidence is valid
   let morphologicalCategory: FormantAnalysis['morphologicalCategory'] = 'unknown';
-  if (estimatedVocalTractLengthCm > 0) {
-    if (estimatedVocalTractLengthCm >= 3.5 && estimatedVocalTractLengthCm <= 7.5) {
+  if (safeVtl > 0 && !isHarmonicLocked && vtlConfidence >= 0.5) {
+    if (safeVtl >= 3.5 && safeVtl <= 7.5) {
       morphologicalCategory = 'feline'; // Cat vocal tract is ~4-6 cm
-    } else if (estimatedVocalTractLengthCm > 7.5 && estimatedVocalTractLengthCm <= 11.5) {
+    } else if (safeVtl > 7.5 && safeVtl <= 11.5) {
       morphologicalCategory = 'canine_small'; // Small-medium dog is ~8-11 cm
-    } else if (estimatedVocalTractLengthCm > 11.5 && estimatedVocalTractLengthCm <= 14.5) {
-      morphologicalCategory = 'canine_large'; // Large dog is ~12-14 cm
-    } else if (estimatedVocalTractLengthCm > 14.5) {
-      morphologicalCategory = 'human_or_large_mammal'; // Human adult is ~15-18 cm
+    } else if (safeVtl > 11.5 && safeVtl <= 15.5) {
+      morphologicalCategory = 'canine_large'; // Large dog (Mastiff, GSD, Lab) is ~12-15 cm
+    } else if (safeVtl > 15.5) {
+      morphologicalCategory = 'human_or_large_mammal'; // Adult human is ~15.5-18 cm
     }
   }
 
   return {
     formants,
     formantDispersionHz,
-    estimatedVocalTractLengthCm,
+    estimatedVocalTractLengthCm: safeVtl,
     vtlRangeCm: [minVtl, maxVtl],
     vtlConfidence,
     morphologicalCategory,

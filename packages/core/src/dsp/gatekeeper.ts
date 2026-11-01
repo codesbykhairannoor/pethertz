@@ -233,10 +233,10 @@ export function validateAnimalVocalization(
     sVoicing -= 0.35;
   }
 
-  // Mechanical clock ticking / fast pulses (burstCount >= 7 in < 2000ms with chaotic jitter > 0.50, or short click < 100ms)
+  // Mechanical clock ticking / fast pulses (burstCount >= 7 in < 2000ms with unvoiced pitch confidence < 0.35, or short click < 100ms)
   if (
-    (burstCount >= 7 && durationMs < 2000 && jitter > 0.50) ||
-    (durationMs < 100 && (f0 === 0 || jitter > 0.50))
+    (burstCount >= 7 && durationMs < 2000 && jitter > 0.50 && pitchConfidence < 0.35) ||
+    (durationMs < 100 && (f0 === 0 || jitter > 0.50) && pitchConfidence < 0.40)
   ) {
     sVoicing -= 0.55;
     sTemporal -= 0.55;
@@ -329,12 +329,12 @@ export function validateAnimalVocalization(
     (spectralFlatness === undefined || spectralFlatness < 0.005)
   ) {
     sSpectral -= 0.45; // Unnatural zero-jitter electronic pure sine generator
-  } else if (f0 > 0 && jitter > 0.50) {
-    sSpectral -= 0.60; // Erratic impulse noise / chaotic jitter (clock ticks, horns)
-    sVoicing -= 0.40;
-  } else if (jitter > 0.40 && spectralCentroidHz > 1800) {
-    sSpectral -= 0.50; // Human cough, sneeze, or atonal friction
-    sVoicing -= 0.30;
+  } else if (f0 > 0 && jitter > 0.60 && pitchConfidence < 0.45) {
+    sSpectral -= 0.50; // Erratic impulse noise without coherent pitch (clock ticks, mechanical clicks)
+    sVoicing -= 0.35;
+  } else if (jitter > 0.50 && spectralCentroidHz > 3200 && pitchConfidence < 0.50) {
+    sSpectral -= 0.45; // Human violent sneeze or cough friction
+    sVoicing -= 0.25;
   }
 
   sSpectral = Math.max(0.0, Math.min(1.0, sSpectral));
