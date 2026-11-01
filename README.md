@@ -124,6 +124,32 @@ console.log(analysis);
 
 ---
 
+## 🐾 Kamus & Katalog Terjemahan Intensi Hewan
+
+PetHertz memetakan fitur bioakustik ke dalam taksonomi emosi standar dua dimensi (*Valence-Arousal*, Russell & Schuller) lengkap dengan rekomendasi tindakan untuk *pawrent*:
+
+### 🐱 Kucing (*Felis catus*)
+| Vokalisasi | Intensi (*Intent*) | Emosi (*Valence / Arousal*) | Urgensi | Terjemahan Bahasa Manusia | Rekomendasi Tindakan |
+| :--- | :--- | :---: | :---: | :--- | :--- |
+| **Meow** | `hunger_solicitation` | $+0.3$ / $0.6$ | Moderate | Meong nada naik (*rising*): meminta makan atau cemilan spesifik. | Periksa mangkuk makan/minum dan jadwal makan. |
+| **Meow** | `distress_isolation` | $-0.65$ / $0.65$ | Moderate | Meong panjang nada menurun (*falling*): kesepian, cemas, atau terjebak. | Hampiri kucing, periksa apakah pintu tertutup/terisolasi. |
+| **Meow** | `greeting_social` | $+0.7$ / $0.4$ | Low | Sapaan hangat dan ramah (*chirp / trill* ceria). | Balas menyapa dengan ramah dan ajak interaksi santai. |
+| **Purr** | `comfort_purring` | $+0.85$ / $0.15$ | Low | Dengkuran getaran tenang: relaksasi tinggi atau swa-penyembuhan. | Pertahankan suasana tenang, berikan belaian jika diinginkan. |
+| **Hiss** | `defense_warning` | $-0.8$ / $0.85$ | High | Desisan turbulen: merasa terancam, mempertahankan teritori. | Berikan ruang/jarak segera. Jangan dekati mendadak. |
+| **Chatter** | `hunting_frustration` | $+0.2$ / $0.7$ | Low | Ketukan gigi berulang: melihat mangsa (burung/serangga) di luar jendela. | Alihkan energi berburu dengan mainan tongkat bulu atau laser. |
+| **Yowl** | `pain_discomfort` | $-0.95$ / $0.95$ | Critical | Raungan tajam berkepanjangan: rasa sakit mendadak atau agresi tinggi. | Periksa kondisi fisik kucing apakah ada cedera atau luka. |
+
+### 🐶 Anjing (*Canis familiaris*)
+| Vokalisasi | Intensi (*Intent*) | Emosi (*Valence / Arousal*) | Urgensi | Terjemahan Bahasa Manusia | Rekomendasi Tindakan |
+| :--- | :--- | :---: | :---: | :--- | :--- |
+| **Bark** | `alarm_threat` | $-0.4$ / $0.9$ | High | Gonggongan tempo cepat nada rendah: sinyal alarm / kehadiran orang asing. | Periksa area pintu, pagar, atau sumber kewaspadaan anjing. |
+| **Bark** | `playful_excitement` | $+0.8$ / $0.75$ | Low | Gonggongan nada tinggi modulasi ceria: ajakan bermain / antusiasme. | Ajak bermain lempar bola atau beri mainan favoritnya. |
+| **Bark** | `attention_seeking` | $+0.1$ / $0.5$ | Moderate | Gonggongan terisolasi nada sedang: meminta perhatian / minta keluar. | Periksa kebutuhan dasar: buang air, minum, atau jalan-jalan. |
+| **Growl** | `warning_aggression` | $-0.85$ / $0.8$ | High | Geraman rendah bergetar: peringatan teritorial / tidak nyaman. | Jangan diprovokasi. Berikan ruang untuk menenangkan diri. |
+| **Whine** | `anxiety_separation` | $-0.7$ / $0.75$ | High | Rintihan frekuensi tinggi harmonik: cemas perpisahan atau memohon bantuan. | Dekati dengan tenang, berikan rasa aman dan periksa pemicu stres. |
+
+---
+
 ## 📄 Lisensi
 MIT License
 
