@@ -1,13 +1,50 @@
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs & Cache
 dist/
+*.tsbuildinfo
+*.tsbuildinfo*
+.turbo/
+.cache/
+
+# Environment Variables & Secrets (Strict Zero-Leak Protection)
 .env
 .env.*
-!.env.example
-*.log
+*.env
+*.pem
+*.key
+*.cert
+*.token
+
+# Audio Datasets & Large Binary Files (ESC-50, Kaggle, Local Recordings)
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.aac
+*.m4a
+test-benchmarks/audio/
 test-benchmarks/extreme-dataset/
 test-benchmarks/massive-dataset/
-test-benchmarks/*.wav
-*.wav
-scripts/debug-*.ts
-scripts/check-*.ts
+test-benchmarks/ood-dataset/
+examples/sample-audio/
 
+# Temporary Scratch Scripts & Logs
+scripts/check-*.ts
+scripts/debug-*.ts
+scripts/trace-*.ts
+scripts/inspect-*.ts
+scripts/compare-*.ts
+scripts/test-*.ts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
