@@ -1,6 +1,6 @@
 {
   "name": "pethertz",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Autonomous pet bioacoustics and vocalization interpretation engine (Cats & Dogs)",
   "type": "module",
   "main": "./dist/index.js",
@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/codesbykhairannoor/pethertz#readme",
   "scripts": {
-    "build": "npx esbuild src/index.ts --bundle --format=esm --platform=node --target=es2022 --outfile=dist/index.js && npx esbuild src/cli.ts --bundle --format=esm --platform=node --target=es2022 --outfile=dist/cli.js && tsc -b"
+    "build": "npx esbuild src/index.ts --bundle --format=esm --platform=node --target=es2022 --outfile=dist/index.js && npx esbuild src/cli.ts --bundle --format=esm --platform=node --target=es2022 --outfile=dist/cli.js && node scripts/bundle-dts.js"
   },
   "keywords": [
     "pethertz",
