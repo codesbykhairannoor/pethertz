@@ -7,10 +7,9 @@ export type DogVocalization =
   | 'unknown';
 
 export type DogIntent =
-  | 'alarm_threat'         // Gonggongan waspada / orang asing (Pongrácz)
-  | 'playful_excitement'   // Mengajak bermain / gembira
-  | 'attention_seeking'    // Mencari perhatian / minta keluar/makan
-  | 'anxiety_separation'   // Cemas berpisah / merengek (whining)
-  | 'warning_aggression'   // Geraman peringatan teritorial
-  | 'greeting_submissive'; // Menyapa ramah / tunduk
-
+  | 'alarm_threat'         // Territorial alarm / stranger warning (Pongrácz)
+  | 'playful_excitement'   // High-pitched playful invitation or enthusiasm
+  | 'attention_seeking'    // Demanding attention, bathroom break, or food
+  | 'anxiety_separation'   // Separation distress / high-frequency whining
+  | 'warning_aggression'   // Agonistic territorial growl
+  | 'greeting_submissive'; // Submissive greeting or affiliative response

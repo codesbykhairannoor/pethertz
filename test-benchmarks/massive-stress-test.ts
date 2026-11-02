@@ -137,8 +137,8 @@ async function runMassiveStressTest() {
   }
 
   // Print summary breakdown of hard negatives
-  console.log('🛡️ BREAKDOWN EVALUASI HARD NEGATIVES (PASANGAN CERMIN):');
-  console.log('| Sub-Kategori Hard Negative | Total | Tertolak (TN) | Bocor (FP) | Penahanan (%) |');
+  console.log('🛡️ HARD NEGATIVES BREAKDOWN (ADVERSARIAL MIRROR PAIRS):');
+  console.log('| Hard Negative Sub-Category | Total | Rejected (TN) | Leaked (FP) | Rejection Rate (%) |');
   console.log('| :--- | :---: | :---: | :---: | :---: |');
   for (const [subCat, stats] of Object.entries(noiseBreakdown)) {
     const rate = ((stats.rejected / stats.total) * 100).toFixed(1);
@@ -147,13 +147,13 @@ async function runMassiveStressTest() {
   }
 
   // Print summary breakdown of real pets
-  console.log('\n🐾 BREAKDOWN EVALUASI SUARA HEWAN ASLI (TP vs FN):');
-  console.log('| Spesies Hewan | Total | Terdeteksi (TP) | Salah Tolak (FN) | Recall (%) |');
+  console.log('\n🐾 AUTHENTIC PET VOCALIZATIONS BREAKDOWN (TP vs FN):');
+  console.log('| Target Species | Total | Detected (TP) | False Rejection (FN) | Recall (%) |');
   console.log('| :--- | :---: | :---: | :---: | :---: |');
   for (const [subCat, stats] of Object.entries(petBreakdown)) {
     const rate = ((stats.detected / stats.total) * 100).toFixed(1);
     const icon = stats.rejected === 0 ? '✅' : '⚠️';
-    console.log(`| ${subCat.padEnd(13)} | ${stats.total} | ${stats.detected} | ${stats.rejected} | ${icon} ${rate}% |`);
+    console.log(`| ${subCat.padEnd(14)} | ${stats.total} | ${stats.detected} | ${stats.rejected} | ${icon} ${rate}% |`);
   }
 
   // Compute Scientific Metrics
@@ -165,12 +165,12 @@ async function runMassiveStressTest() {
   const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
 
   console.log('\n========================================================================');
-  console.log('📊 STATISTIK CONFUSION MATRIX RESMI (100 AUDIO DATASET):');
+  console.log('📊 OFFICIAL CONFUSION MATRIX SCORECARD (100-AUDIO DATASET):');
   console.log('========================================================================');
-  console.log(`True Positives  (TP - Hewan asli terdeteksi benar) : ${TP} / 50`);
-  console.log(`True Negatives  (TN - Noise berhasil ditolak)      : ${TN} / 50`);
-  console.log(`False Positives (FP - Noise bocor disangka hewan)   : ${FP}`);
-  console.log(`False Negatives (FN - Hewan asli tertolak noise)   : ${FN}`);
+  console.log(`True Positives  (TP - Authentic pet sound correctly detected)  : ${TP} / 50`);
+  console.log(`True Negatives  (TN - Non-pet noise successfully rejected)     : ${TN} / 50`);
+  console.log(`False Positives (FP - Noise leaked as pet vocalization)        : ${FP}`);
+  console.log(`False Negatives (FN - Authentic pet vocalization missed)       : ${FN}`);
   console.log('------------------------------------------------------------------------');
   console.log(`🎯 Overall Accuracy : ${(accuracy * 100).toFixed(2)}%`);
   console.log(`🎯 Precision        : ${(precision * 100).toFixed(2)}%`);
@@ -182,14 +182,14 @@ async function runMassiveStressTest() {
   // Print any leaks or errors
   const errors = results.filter((r) => r.classification === 'FP' || r.classification === 'FN');
   if (errors.length > 0) {
-    console.log('⚠️ DETAIL ANOMALI / KESALAHAN KLASIFIKASI:');
+    console.log('⚠️ CLASSIFICATION ANOMALIES / ERRORS:');
     for (const err of errors) {
       console.log(
         ` - [${err.classification}] File: ${err.file} | Expected: ${err.expectedCategory} | SubCat: ${err.subCategory} | F0: ${err.f0}Hz | Jitter: ${err.jitter}% | Score: ${err.score} | Reason: ${err.rejectionReason}`
       );
     }
   } else {
-    console.log('🏆 SEMPURNA! Nol False Positive dan Nol False Negative di seluruh 100 file!');
+    console.log('🏆 PERFECT SCORE! Zero False Positives and Zero False Negatives across all 100 files!');
   }
 }
 

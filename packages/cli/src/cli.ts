@@ -15,16 +15,16 @@ function printHelp() {
   pethertz <command> [options]
 
 \x1b[1mCOMMANDS:\x1b[0m
-  \x1b[32manalyze <file.wav>\x1b[0m    Menganalisis file WAV dan menginterpretasikan suara hewan
-  \x1b[32minspect <file.wav>\x1b[0m    Menampilkan metrik bioakustik mentah (F0, RMS, ZCR, STFT Centroid)
-  \x1b[32mdemo [cat|dog]\x1b[0m        Menjalankan uji coba simulasi audio sintetis langsung di terminal
+  \x1b[32manalyze <file.wav>\x1b[0m    Analyze a WAV audio file and interpret pet vocalization
+  \x1b[32minspect <file.wav>\x1b[0m    Display raw bioacoustic metrics (F0, RMS, ZCR, STFT Centroid, Formants, VTL)
+  \x1b[32mdemo [cat|dog]\x1b[0m        Run a synthetic audio simulation directly in the terminal
 
 \x1b[1mOPTIONS:\x1b[0m
-  --species <cat|dog>   Menentukan jenis hewan (default: 'cat')
-  --json                Menampilkan output murni dalam format JSON
-  --help, -h            Menampilkan bantuan ini
+  --species <cat|dog>   Specify target pet species (default: 'cat')
+  --json                Output clean JSON format
+  --help, -h            Show this help message
 
-\x1b[1mCONTOH PENGGUNAAN:\x1b[0m
+\x1b[1mEXAMPLES:\x1b[0m
   $ pethertz analyze cat_meow.wav --species cat
   $ pethertz analyze dog_bark.wav --species dog --json
   $ pethertz inspect audio.wav
@@ -52,7 +52,7 @@ async function main() {
 
   if (command === 'demo') {
     const targetSpecies = args[1]?.toLowerCase() === 'dog' ? 'dog' : 'cat';
-    console.log(`\n\x1b[35m[PetHertz]\x1b[0m Menjalankan simulasi sintetis spesies: \x1b[1m${targetSpecies.toUpperCase()}\x1b[0m\n`);
+    console.log(`\n\x1b[35m[PetHertz]\x1b[0m Running synthetic simulation for species: \x1b[1m${targetSpecies.toUpperCase()}\x1b[0m\n`);
 
     const sr = 44100;
     if (targetSpecies === 'cat') {
@@ -83,7 +83,7 @@ async function main() {
   if (command === 'analyze' || command === 'inspect') {
     const filePath = args[1];
     if (!filePath || filePath.startsWith('--')) {
-      console.error('\x1b[31mError: Harap sertakan path file audio WAV.\x1b[0m Contoh: pethertz analyze suara.wav');
+      console.error('\x1b[31mError: Please provide a valid WAV audio file path.\x1b[0m Example: pethertz analyze pet.wav');
       process.exit(1);
     }
 
@@ -104,20 +104,20 @@ async function main() {
           console.log(`\n\x1b[1m\x1b[36m📊 BIOACOUSTIC METRICS REPORT (${filePath})\x1b[0m`);
           console.log(`-----------------------------------------------------`);
           console.log(`Sample Rate          : ${decoded.sampleRate} Hz`);
-          console.log(`Duration             : ${decoded.durationSec} detik`);
-          console.log(`Pitch Dasar (F0)     : \x1b[32m${res.acousticMetrics.fundamentalFrequencyHz} Hz\x1b[0m (Confidence: ${Math.round(res.acousticMetrics.pitchConfidence * 100)}%)`);
-          console.log(`Kontur Intonasi      : \x1b[33m${res.acousticMetrics.intonationContour}\x1b[0m`);
+          console.log(`Duration             : ${decoded.durationSec} s`);
+          console.log(`Fundamental (F0)     : \x1b[32m${res.acousticMetrics.fundamentalFrequencyHz} Hz\x1b[0m (Confidence: ${Math.round(res.acousticMetrics.pitchConfidence * 100)}%)`);
+          console.log(`Intonation Contour   : \x1b[33m${res.acousticMetrics.intonationContour}\x1b[0m`);
           console.log(`Spectral Centroid    : ${res.acousticMetrics.spectralCentroidHz} Hz`);
           console.log(`RMS Energy           : ${res.acousticMetrics.rms}`);
           console.log(`Zero-Crossing Rate   : ${res.acousticMetrics.zeroCrossingRate}`);
           console.log(`Burst Count          : ${res.acousticMetrics.burstCount} (Interval: ${res.acousticMetrics.burstIntervalMs} ms)`);
           if (res.acousticMetrics.formants && res.acousticMetrics.formants.length > 0) {
-            console.log(`Resonansi Forman     : [${res.acousticMetrics.formants.join(', ')}] Hz`);
-            console.log(`Dispersi Forman (ΔF) : ${res.acousticMetrics.formantDispersionHz} Hz`);
-            console.log(`Panjang Vokal (VTL)  : \x1b[35m${res.acousticMetrics.estimatedVocalTractLengthCm} cm\x1b[0m (${res.acousticMetrics.morphologicalCategory})`);
+            console.log(`Formant Resonances   : [${res.acousticMetrics.formants.join(', ')}] Hz`);
+            console.log(`Formant Dispersion   : ${res.acousticMetrics.formantDispersionHz} Hz`);
+            console.log(`Vocal Tract Length   : \x1b[35m${res.acousticMetrics.estimatedVocalTractLengthCm} cm\x1b[0m (${res.acousticMetrics.morphologicalCategory})`);
           }
           if (res.acousticMetrics.spectralFlatness !== undefined) {
-            console.log(`Entropi Wiener MFCC  : ${res.acousticMetrics.spectralFlatness}`);
+            console.log(`Wiener Flatness      : ${res.acousticMetrics.spectralFlatness}`);
           }
           console.log(`-----------------------------------------------------\n`);
         }
@@ -133,13 +133,13 @@ async function main() {
       const res = await engine.analyze(decoded.audioData);
       printResult(res, isJson);
     } catch (err: any) {
-      console.error(`\x1b[31mError saat membaca file '${filePath}':\x1b[0m`, err.message);
+      console.error(`\x1b[31mError reading audio file '${filePath}':\x1b[0m`, err.message);
       process.exit(1);
     }
     return;
   }
 
-  console.error(`\x1b[31mPerintah tidak dikenal: ${command}\x1b[0m`);
+  console.error(`\x1b[31mUnknown command: ${command}\x1b[0m`);
   printHelp();
   process.exit(1);
 }
@@ -151,32 +151,31 @@ function printResult(res: any, isJson: boolean) {
   }
 
   if (!res.isAnimalVocalization) {
-    console.log(`\x1b[1m\x1b[31m🚫 BUKAN SUARA HEWAN PELIHARAAN (Gatekeeper Rejection)\x1b[0m`);
+    console.log(`\x1b[1m\x1b[31m🚫 GATEKEEPER REJECTION: NON-PET SOUND DETECTED\x1b[0m`);
     console.log(`=====================================================`);
     console.log(`Status        : \x1b[33m${res.vocalization}\x1b[0m`);
-    console.log(`Alasan Filter : \x1b[31m${res.acousticMetrics?.gatekeeper?.rejectionReason ?? 'Non-animal'}\x1b[0m`);
-    console.log(`Keterangan    : ${res.humanExplanation}`);
-    console.log(`Rekomendasi   : ${res.actionRecommendation}`);
+    console.log(`Filter Reason : \x1b[31m${res.acousticMetrics?.gatekeeper?.rejectionReason ?? 'Non-animal'}\x1b[0m`);
+    console.log(`Explanation   : ${res.humanExplanation}`);
+    console.log(`Recommendation: ${res.actionRecommendation}`);
     console.log(`=====================================================\n`);
     return;
   }
 
   const icon = res.species === 'cat' ? '🐱' : '🐶';
-  console.log(`\x1b[1m\x1b[32m${icon} HASIL INTERPRETASI BIOAKUSTIK PETHERTZ\x1b[0m`);
+  console.log(`\x1b[1m\x1b[32m${icon} PETHERTZ BIOACOUSTIC INTERPRETATION REPORT\x1b[0m`);
   console.log(`=====================================================`);
-  console.log(`Spesies          : \x1b[1m${res.species.toUpperCase()}\x1b[0m`);
-  console.log(`Vokalisasi       : \x1b[36m${res.vocalization}\x1b[0m`);
-  console.log(`Intensi Terpilih : \x1b[1m\x1b[33m${res.intent}\x1b[0m (Keyakinan: ${Math.round(res.confidence * 100)}%)`);
-  console.log(`Dimensi Afektif  : Valence: \x1b[36m${res.affectiveDimensions?.valence}\x1b[0m | Arousal: \x1b[35m${res.affectiveDimensions?.arousal}\x1b[0m | Urgency: \x1b[31m${res.affectiveDimensions?.urgency?.toUpperCase()}\x1b[0m`);
+  console.log(`Species          : \x1b[1m${res.species.toUpperCase()}\x1b[0m`);
+  console.log(`Vocalization     : \x1b[36m${res.vocalization}\x1b[0m`);
+  console.log(`Inferred Intent  : \x1b[1m\x1b[33m${res.intent}\x1b[0m (Confidence: ${Math.round(res.confidence * 100)}%)`);
+  console.log(`Affective State  : Valence: \x1b[36m${res.affectiveDimensions?.valence}\x1b[0m | Arousal: \x1b[35m${res.affectiveDimensions?.arousal}\x1b[0m | Urgency: \x1b[31m${res.affectiveDimensions?.urgency?.toUpperCase()}\x1b[0m`);
   console.log(`Pitch F0         : ${res.acousticMetrics.fundamentalFrequencyHz} Hz [${res.acousticMetrics.intonationContour}] (Jitter: ${(res.acousticMetrics.pitchJitter * 100).toFixed(1)}%)`);
-  console.log(`Durasi Sinyal    : ${res.acousticMetrics.durationMs} ms (Bursts: ${res.acousticMetrics.burstCount})`);
+  console.log(`Signal Duration  : ${res.acousticMetrics.durationMs} ms (Bursts: ${res.acousticMetrics.burstCount})`);
   console.log(`-----------------------------------------------------`);
-  console.log(`\x1b[1mPenjelasan:\x1b[0m`);
+  console.log(`\x1b[1mExplanation:\x1b[0m`);
   console.log(`  ${res.humanExplanation}`);
-  console.log(`\x1b[1mRekomendasi Tindakan:\x1b[0m`);
+  console.log(`\x1b[1mRecommended Action:\x1b[0m`);
   console.log(`  \x1b[35m${res.actionRecommendation}\x1b[0m`);
   console.log(`=====================================================\n`);
 }
 
 main().catch(console.error);
-

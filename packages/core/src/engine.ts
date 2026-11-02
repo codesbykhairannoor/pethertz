@@ -222,9 +222,9 @@ export class PetHertz<TIntent = string, TVocalization = string> {
           },
           acousticMetrics,
           qualityFlags,
-          humanExplanation: `Sinyal terdeteksi berada di ambang batas bioakustik (skor plausibilitas: ${(gatekeeper.biologicalPlausibilityScore * 100).toFixed(0)}%). Terindikasi flag kualitas: [${qualityFlags.join(', ')}]. ${this.getGatekeeperExplanation(gatekeeper.rejectionReason)}`,
+          humanExplanation: `Signal detected at borderline bioacoustic plausibility threshold (score: ${(gatekeeper.biologicalPlausibilityScore * 100).toFixed(0)}%). Quality flags: [${qualityFlags.join(', ')}]. ${this.getGatekeeperExplanation(gatekeeper.rejectionReason)}`,
           actionRecommendation:
-            'Rekam ulang audio lebih dekat ke hewan peliharaan di lingkungan yang lebih tenang tanpa derau latar belakang.',
+            'Re-record audio closer to the pet in a quieter environment without background interference.',
         };
       }
 
@@ -243,7 +243,7 @@ export class PetHertz<TIntent = string, TVocalization = string> {
         qualityFlags,
         humanExplanation: this.getGatekeeperExplanation(gatekeeper.rejectionReason),
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal yang terdeteksi bukan suara vokalisasi hewan peliharaan.',
+          'No action required. The detected audio is not a domestic pet vocalization.',
       };
     }
 
@@ -258,21 +258,21 @@ export class PetHertz<TIntent = string, TVocalization = string> {
   private getGatekeeperExplanation(reason?: string): string {
     switch (reason) {
       case 'synthetic_mechanical_tone':
-        return 'Sinyal terdeteksi sebagai suara mekanis/elektronik statis (seperti klakson, nada dering, atau sirine) dengan pitch tanpa vibrasi biologis.';
+        return 'Signal identified as a static mechanical or electronic tone (such as a vehicle horn, ringtone, or siren) lacking biological pitch jitter.';
       case 'impulsive_noise_or_cough':
-        return 'Sinyal terdeteksi sebagai letupan impulsif non-hewan (seperti suara batuk manusia atau benturan benda).';
+        return 'Signal identified as an impulsive non-pet burst (such as a human cough or physical impact).';
       case 'human_speech_or_cough':
-        return 'Sinyal terdeteksi berasal dari saluran vokal manusia (tangisan bayi, batuk, atau percakapan), bukan hewan peliharaan.';
+        return 'Signal matches adult or infant human vocal tract allometry (speech, cough, or crying), not a companion domestic pet.';
       case 'ultrasonic_impulse_or_click':
-        return 'Sinyal terdeteksi sebagai bunyi klik frekuensi ultra-tinggi/metalik (seperti jam dinding, denting kaca, atau gesekan keras).';
+        return 'Signal identified as an ultra-high frequency metallic or mechanical impulse click (such as a clock tick or glass fracture).';
       case 'ambient_noise_unvoiced':
-        return 'Sinyal terdeteksi sebagai derau lingkungan acak (seperti desau angin, gesekan, atau dengung ruangan) tanpa struktur nada vokal hewan.';
+        return 'Signal identified as unvoiced ambient background noise (such as wind, air friction, or room rumble) lacking vocal harmonic structure.';
       case 'chaotic_turbulent_noise':
-        return 'Sinyal terdeteksi sebagai derau acak yang melompat secara kacau (seperti suara gemeretak api, angin, atau gesekan benda) tanpa kontinuitas biologis.';
+        return 'Signal exhibits non-continuous chaotic turbulence (such as fire crackle or scraping) without glottal biological continuity.';
       case 'inaudible_silence':
-        return 'Intensitas audio terlalu hening untuk dapat dianalisis.';
+        return 'Audio energy is below the audible threshold for bioacoustic feature analysis.';
       default:
-        return 'Sinyal tidak memenuhi kriteria bioakustik vokalisasi hewan.';
+        return 'Signal does not satisfy the bioacoustic plausibility criteria for pet vocalization.';
     }
   }
 

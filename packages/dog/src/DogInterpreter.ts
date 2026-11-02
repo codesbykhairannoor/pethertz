@@ -64,9 +64,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Karakteristik resonansi vokal (F1 < 800 Hz atau VTL > 17.0 cm pada F0 rendah) adalah anatomi saluran vokal manusia (batuk/percakapan/dengkuran), bukan anjing.',
+          'Vocal tract resonance characteristics (human F1 < 800 Hz or VTL > 17.0 cm at low F0) indicate adult human respiratory/vocal tract anatomy (cough/speech/snore), not a dog.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal berasal dari suara saluran napas/vokal manusia.',
+          'No action required. Signal originates from human respiratory or vocal sound.',
       };
     }
 
@@ -91,9 +91,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal terdeteksi sebagai suara batuk atau pembersihan tenggorokan manusia (resonansi saluran vokal manusia pada F0 rendah), bukan suara anjing.',
+          'Signal identified as human coughing or throat clearing (vocal tract resonance in human range at low F0), not a canine vocalization.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal berasal dari batuk/suara pernapasan manusia.',
+          'No action required. Signal originates from human coughing or breathing sounds.',
       };
     }
 
@@ -113,9 +113,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal terdeteksi sebagai bunyi bersin frekuensi tinggi manusia, bukan vokalisasi anjing.',
+          'Signal identified as high-frequency human sneeze friction, not a canine vocalization.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal bukan suara anjing.',
+          'No action required. Signal is not a dog call.',
       };
     }
 
@@ -142,9 +142,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: -0.5, arousal: 0.8, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal bernada tinggi berkepanjangan terdeteksi sebagai tangisan bayi manusia atau sirine buatan, bukan gonggongan anjing.',
+          'Prolonged high-pitch sound identified as human infant crying or an artificial siren, not a dog bark.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal berasal dari suara non-hewan.',
+          'No action required. Signal originates from non-canine sound.',
       };
     }
 
@@ -164,9 +164,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal terdeteksi sebagai dengkuran manusia saat tidur (frekuensi 70-135 Hz tidak sesuai dengan ukuran saluran vokal anjing kecil/sedang).',
+          'Signal identified as human sleep snoring (70-135 Hz vibration inconsistent with canine vocal tract dimensions).',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal berasal dari dengkuran manusia.',
+          'No action required. Signal originates from human snoring.',
       };
     }
 
@@ -186,9 +186,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal terdeteksi sebagai nada mekanis/elektronik sintetis (klakson kendaraan/sirine/resonator buatan), bukan vokalisasi anjing.',
+          'Signal identified as synthetic mechanical or electronic tone (vehicle horn, alarm, or artificial resonator), not a canine vocalization.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal bukan suara anjing.',
+          'No action required. Signal is not a dog call.',
       };
     }
 
@@ -206,9 +206,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal terdeteksi sebagai detak jam mekanis berulang atau letupan impulsif pendek, bukan vokalisasi anjing.',
+          'Signal identified as repetitive mechanical clock ticking or short impulsive clicks, not a canine vocalization.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal bukan suara anjing.',
+          'No action required. Signal is not a dog call.',
       };
     }
 
@@ -226,9 +226,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal atonal turbulen atau derau putih terdeteksi. Anjing tidak memiliki vokalisasi desisan (hissing) seperti kucing.',
+          'Atonal turbulent or white noise detected. Canines do not possess continuous hissing vocalizations.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal bukan vokalisasi anjing.',
+          'No action required. Signal is not a canine vocalization.',
       };
     }
 
@@ -251,9 +251,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Rintihan frekuensi tinggi harmonik terdeteksi (whining). Mengindikasikan kecemasan perpisahan, ketakutan, atau memohon bantuan.',
+          'High-frequency harmonic whine/whimper detected. Indicates separation anxiety, acute stress, or soliciting assistance.',
         actionRecommendation:
-          'Dekati anjing dengan tenang, berikan rasa aman, dan periksa apakah ada penyebab stres di sekitarnya.',
+          'Approach the dog calmly, provide reassurance, and investigate potential environmental stressors.',
       };
     }
 
@@ -283,9 +283,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Resonansi akustik saluran vokal (VTL feline 4-6.8 cm) dan pola frekuensi mengindikasikan suara kucing (bukan anjing).',
+          'Acoustic vocal tract resonance (feline VTL 4-6.8 cm) and pitch pattern indicate a feline (cat) vocalization rather than a dog.',
         actionRecommendation:
-          'Gunakan CatEngine (@pethertz/cat) untuk analisis emosi dan intensitas kucing yang komprehensif.',
+          'Use CatEngine (@pethertz/cat) for comprehensive feline intent and affective analysis.',
       };
     }
 
@@ -314,9 +314,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Geraman rendah bergetar (growling) terdeteksi. Peringatan teritorial atau rasa tidak nyaman dengan situasi sekitar.',
+          'Low-frequency vibrating growl detected. Territorial warning or discomfort with current surroundings.',
         actionRecommendation:
-          'Jangan melakukan gerakan mendadak atau memprovokasi. Berikan anjing ruang untuk menenangkan diri.',
+          'Avoid sudden movements or provocation. Give the dog physical space to calm down.',
       };
     }
 
@@ -342,9 +342,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Gonggongan beruntun bertempo cepat dengan pitch rendah. Karakteristik sinyal alarm / kehadiran orang asing / ancaman potensial.',
+          'Rapid-cadence low-pitch bark sequence. Characteristic of an alarm response or alerting to an intruder or perceived threat.',
         actionRecommendation:
-          'Periksa area pintu, pagar, atau luar rumah untuk melihat objek atau orang yang menarik kewaspadaan anjing.',
+          'Check perimeter, doorways, or windows to identify the stimulus triggering vigilance.',
       };
     }
 
@@ -368,9 +368,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Gonggongan bernada tinggi dengan modulasi ceria. Menandakan ajakan bermain atau antusiasme tinggi.',
+          'High-pitched bark with cheerful modulation. Indicates play solicitation or high enthusiasm.',
         actionRecommendation:
-          'Ajak anjing berinteraksi, bermain lempar bola, atau beri mainan kesukaannya.',
+          'Engage with the dog, play fetch, or provide favorite toys.',
       };
     }
 
@@ -399,9 +399,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Gonggongan terisolasi bernada sedang. Sinyal meminta perhatian (misal: minta dibukakan pintu, minta makan, atau menyapa).',
+          'Isolated medium-pitch bark. Signal requesting attention (e.g., asking to open door, requesting food, or greeting).',
         actionRecommendation:
-          'Periksa kebutuhan dasarnya: mangkuk air, waktu buang air kecil, atau ingin diajak jalan.',
+          'Check basic needs: water bowl, bathroom break, or outdoor exercise.',
       };
     }
 
@@ -426,9 +426,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Vokalisasi gonggongan umum terdeteksi dengan modulasi bioakustik valid.',
+          'Canine vocalization detected with valid bioacoustic modulation.',
         actionRecommendation:
-          'Perhatikan konteks lingkungan dan bahasa tubuh anjing (kibasan ekor, postur telinga).',
+          'Observe environmental context and canine body language (tail wagging, ear posture).',
       };
     }
 
@@ -445,9 +445,9 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
       },
       acousticMetrics: features,
       humanExplanation:
-        'Sinyal akustik tidak cocok dengan pola vokalisasi anjing yang valid.',
+        'Acoustic signal does not match valid canine vocalization patterns.',
       actionRecommendation:
-        'Tidak ada tindakan diperlukan. Sinyal bukan vokalisasi anjing.',
+        'No action required. Signal is not a canine vocalization.',
     };
   }
 }

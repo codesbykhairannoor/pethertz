@@ -2,86 +2,86 @@
 
 > **Isomorphic TypeScript / JavaScript library for pet bioacoustics & vocalization intent interpretation (Cats & Dogs).**
 
-PetHertz adalah inisiatif library NPM open-source pertama yang menerjemahkan vokalisasi suara hewan peliharaan (meong, dengkuran, gonggongan, rengekan) menjadi intensi kontekstual dan status emosional yang terstandarisasi, didukung oleh riset ilmiah bioakustik peer-reviewed.
+PetHertz is a zero-dependency, edge-native bioacoustic interpretation engine for domestic companion animals (cats and dogs). Grounded in peer-reviewed bioacoustic and ethological research, PetHertz decodes raw acoustic signals (meows, purrs, barks, whines, growls, and hisses) into standardized contextual intents, affective states (*valence* and *arousal*), and actionable owner recommendations.
 
 ---
 
-## 📚 Dokumen Riset & Dataset Terverifikasi
+## 📚 Scientific Foundations & Verified Datasets
 
-Seluruh landasan teori, metodologi riset internasional, rumus akustik ($F_0$, RMS, Spectral Centroid, Harmonics), serta kurasi dataset terbuka (Zenodo, HuggingFace, Kaggle, ESC-50, AudioSet) telah dirangkum lengkap di:
+All theoretical foundations, international peer-reviewed methodologies, acoustic formulas ($F_0$, RMS, Spectral Centroid, Levinson-Durbin LPC Formant Dispersion, Acoustic Allometry), and curated open bioacoustic datasets (Zenodo, HuggingFace, Kaggle, ESC-50, AudioSet) are documented in detail:
 
 👉 **[RESEARCH_AND_DATASETS.md](file:///d:/Pethertz/RESEARCH_AND_DATASETS.md)**
 
 ---
 
-## 🏛️ Arsitektur Paket Monorepo (Zero External AI / 100% Native DSP)
+## 🏛️ Monorepo Architecture (Zero External AI / 100% Native Edge DSP)
 
-PetHertz beroperasi 100% offline tanpa ketergantungan API cloud atau model black-box yang berat:
+PetHertz operates 100% offline with zero cloud API dependencies and zero heavy black-box neural networks:
 
-* **`@pethertz/core`**: Mesin DSP audio mandiri:
-  * **YIN Pitch Tracking**: Estimasi $F_0$ akurat sub-harmonik ($20 - 3500\text{ Hz}$).
-  * **Acoustic Allometry & Formant Dispersion**: Ekstraksi resonansi vokal ($F_1, F_2, F_3$) dan estimasi panjang saluran vokal ($L = \frac{c}{2\Delta F}$) via Linear Predictive Coding (LPC) & rekursi Levinson-Durbin.
-  * **13-Band MFCC Extractor & Wiener Spectral Flatness**: Analisis timbre spektral tanpa library eksternal.
+* **`@pethertz/core`**: Autonomous audio DSP engine:
+  * **YIN Pitch Tracking**: Highly accurate sub-harmonic $F_0$ estimation ($20 - 3500\text{ Hz}$).
+  * **Acoustic Allometry & Formant Dispersion**: Vocal resonance extraction ($F_1, F_2, F_3$) and Vocal Tract Length estimation ($L = \frac{c}{2\Delta F}$) via Linear Predictive Coding (LPC) and Levinson-Durbin recursion.
+  * **13-Band MFCC Extractor & Wiener Spectral Flatness**: Native spectral timbre analysis without external dependencies.
   * **Voice Activity Detection (VAD) & Adaptive Dynamic Noise Floor ($P_{15}$)**.
-  * **Bioacoustic Gatekeeper**: Diskriminasi ketat terhadap batuk/bersin/tangisan manusia, klakson mobil, dan dengung mesin.
-  * **Zero-Dependency RIFF/WAVE Decoder & Encoder**: Dukungan PCM 8, 16, 24-bit dan float 32-bit.
-* **`@pethertz/cat`**: Interpreter bioakustik kucing berbasis riset Susanne Schötz (Lund University), Prato-Previde (2020), dan zona non-fonatori kucing (*feline dead-zone*).
-* **`@pethertz/dog`**: Interpreter bioakustik anjing berbasis metrik kanina Péter Pongrácz (ELTE Budapest) dan model dua dimensi *valence-arousal* (Hantke & Schuller 2018).
-* **`@pethertz/cli`**: CLI binary (`pethertz`) untuk analisis dan inspeksi berkas WAV langsung di terminal.
+  * **Probabilistic Bioacoustic Gatekeeper**: Strict multi-tier discrimination against human speech, coughing, sneezing, infant crying, sirens, horns, and mechanical drones.
+  * **Zero-Dependency RIFF/WAVE Decoder & Encoder**: Native support for 8, 16, 24-bit PCM and 32-bit float audio.
+* **`@pethertz/cat`**: Feline bioacoustic interpreter based on research by Susanne Schötz (Lund University), Prato-Previde (2020), and anatomical feline dead-zone filtering.
+* **`@pethertz/dog`**: Canine bioacoustic interpreter based on ethological metrics by Péter Pongrácz (ELTE Budapest) and two-dimensional valence-arousal models (Hantke & Schuller 2018).
+* **`@pethertz/cli`**: Command-line binary (`pethertz`) for inspecting and analyzing WAV files directly in the terminal.
 
 ---
 
-## 📊 Hasil Uji Stres Simetris Riil (Benchmark 100 Audio Liar & Hard Negatives)
+## 📊 Symmetrical Benchmark Performance (100 Real-World & Hard Negative Files)
 
-Diuji secara ketat dan simetris menggunakan 100 berkas audio dunia nyata (50 hewan asli vs 50 *adversarial mirror pairs* ESC-50: tangisan bayi, batuk, bersin, klakson, sirine, dengkuran, jam dinding, vacuum cleaner, pecahan kaca, mesin diesel):
+Rigorously and symmetrically evaluated on 100 real-world audio recordings (50 authentic domestic pet vocalizations vs 50 ESC-50 adversarial mirror pairs: infant crying, human coughs, sneezes, snoring, sirens, car horns, clock ticks, vacuum cleaners, glass shattering, diesel engines):
 
 * **Overall Accuracy:** `100.00%` (100 / 100)
-* **Precision:** `100.00%` (0 False Positive / Zero Leaks pada seluruh 50 suara non-hewan)
-* **Specificity:** `100.00%` (50 / 50 Noise Lingkungan & Human Mirror Pairs 100% Tertolak!)
-* **Sensitivity / Recall:** `100.00%` (50 / 50 Hewan Asli Terdeteksi — Kucing: 100.0%, Anjing: 100.0%)
+* **Precision:** `100.00%` (0 False Positives / Zero Leaks across all 50 non-animal sounds)
+* **Specificity:** `100.00%` (50 / 50 Environmental noise & human mirror pairs rejected)
+* **Sensitivity / Recall:** `100.00%` (50 / 50 Authentic pets detected — Cats: 100.0%, Dogs: 100.0%)
 * **F1-Score:** `100.00%`
 
-| Kategori Uji | Dataset / Sumber | Total Sampel | Hasil Evaluasi |
+| Test Category | Dataset / Source | Sample Count | Evaluation Result |
 | :--- | :--- | :---: | :--- |
-| **Noise & Human Hard Negatives** | ESC-50 (tangisan, batuk, bersin, sirine, klakson, jam) | 50 file | **50 / 50 Tertolak (100% TN, 0 FP)** |
-| **Cat Vocalizations** | Kaggle Cat Meow & ESC-50 Cat | 25 file | **25 / 25 Terdeteksi (100.0% TP, 0 FN)** |
-| **Dog Vocalizations** | AudioSet Dog Bark & ESC-50 Dog | 25 file | **25 / 25 Terdeteksi (100.0% TP, 0 FN)** |
+| **Noise & Human Hard Negatives** | ESC-50 (crying, coughing, sneezing, sirens, horns, clocks) | 50 files | **50 / 50 Rejected (100% TN, 0 FP)** |
+| **Cat Vocalizations** | Kaggle Cat Meow & ESC-50 Cat | 25 files | **25 / 25 Detected (100.0% TP, 0 FN)** |
+| **Dog Vocalizations** | AudioSet Dog Bark & ESC-50 Dog | 25 files | **25 / 25 Detected (100.0% TP, 0 FN)** |
 
 ---
 
-## ⚠️ Batasan Bioakustik & Technical Disclaimer (Beta Release)
+## ⚠️ Bioacoustic Boundaries & Technical Disclaimer (Beta Release)
 
-PetHertz dirancang murni berbasis **matematika DSP linier dan allometri bioakustik komparatif** tanpa ketergantungan neural network (NN) berat. Berdasarkan audit teknis AI adversarial (DeepSeek-V3, Llama 3.3, Meta AI), berikut adalah batasan fisik dan operasional sistem:
+PetHertz is built on **linear DSP mathematics and comparative bioacoustic allometry** without deep neural networks. Based on adversarial AI audits (DeepSeek-V3, Llama 3.3 70B), the following physical and operational boundaries apply:
 
-1. **Cakupan Spesies:**
-   - Dikhususkan untuk **hewan peliharaan pendamping domestik (*Felis catus* & *Canis familiaris*)**.
-   - Tidak mencakup satwa liar eksotis, mamalia air, pengerat mikro ($VTL < 3.5\text{ cm}$), atau primata besar.
+1. **Species Scope:**
+   - Designed strictly for **domestic companion animals (*Felis catus* & *Canis familiaris*)**.
+   - Does not support exotic wildlife, marine mammals, micro-rodents ($VTL < 3.5\text{ cm}$), or large primates.
 
-2. **Batas Teoretis DSP Linier (Alasan 13 False Negative):**
-   - **Low Signal-to-Noise Ratio ($\text{SNR} < -10\text{ dB}$):** Suara hewan yang sangat pelan atau desisan tertimbun noise lantai ruangan dapat ditolak sebagai *unvoiced ambient noise*.
-   - **Artifak Non-Linear Chaos:** Vokalisasi non-stasioner ekstrim (misal: batuk hairball, choking) yang tidak memiliki formasi harmonik teratur tidak dapat diestimasi oleh pelacak pitch kuasi-periodik.
-   - **Akustik Multipath & Gema:** Ruangan dengan pantulan suara gema ekstrim dapat mengaburkan formasi dispersi formasi vokal ($VTL$).
+2. **Theoretical Limits of Linear DSP:**
+   - **Low Signal-to-Noise Ratio ($\text{SNR} < -10\text{ dB}$):** Faint animal calls or hisses buried under ambient room noise may be rejected as unvoiced ambient noise.
+   - **Non-Linear Chaotic Phonation:** Extreme non-stationary phonation (e.g. hairball coughing, choking) lacking stable harmonic structure cannot be reliably tracked by quasi-periodic pitch estimators.
+   - **Acoustic Multipath & Reverb:** Environments with severe reverberation may disperse vocal tract resonances ($VTL$).
 
-3. **Filosofi Keamanan Gatekeeper:**
-   - PetHertz memprioritaskan **Zero False Positives (Spesifisitas 100%)**: Sistem sengaja memilih menolak suara ambivalen daripada membiarkan batuk manusia, dengkuran orang tidur, atau alarm jam diterjemahkan secara keliru sebagai suara hewan.
+3. **Gatekeeper Security Philosophy:**
+   - PetHertz prioritizes **Zero False Positives (100% Specificity)**: The system rejects ambiguous signals rather than allowing human coughing, snoring, or mechanical alarms to be misclassified as pet vocalizations.
 
 ---
 
-## 💻 Penggunaan CLI Langsung
+## 💻 CLI Usage
 
-Kamu bisa langsung menganalisis file audio WAV dari terminal:
+Analyze and inspect WAV audio files directly from the command line:
 
 ```bash
-# Analisis suara kucing
-pethertz analyze sound.wav --species cat
+# Analyze a cat vocalization
+pethertz analyze cat_meow.wav --species cat
 
-# Analisis suara anjing dengan format output JSON
-pethertz analyze bark.wav --species dog --json
+# Analyze a dog bark with raw JSON output
+pethertz analyze dog_bark.wav --species dog --json
 
-# Inspeksi metrik bioakustik mentah (F0, intonasi, RMS, ZCR, spectral centroid)
-pethertz inspect sound.wav
+# Inspect raw bioacoustic metrics (F0, intonation, RMS, ZCR, spectral centroid, VTL)
+pethertz inspect audio.wav
 
-# Uji coba simulasi sintetis bawaan
+# Run synthetic audio simulations directly in the terminal
 pethertz demo cat
 pethertz demo dog
 ```
@@ -90,7 +90,7 @@ pethertz demo dog
 
 ## 🎙️ Real-time Audio Streaming (Live Mic / IoT Monitoring)
 
-Untuk aplikasi monitoring hewan peliharaan real-time (kamera pintar, mikrofon live):
+For real-time companion animal monitoring applications (smart pet cameras, edge IoT microphones):
 
 ```typescript
 import { PetHertz } from '@pethertz/core';
@@ -103,32 +103,32 @@ const stream = engine.createStreamAnalyzer({
 });
 
 stream.on('vocalization', (res) => {
-  console.log(`[Terdeteksi] ${res.vocalization} -> ${res.intent}`);
-  console.log(`Tindakan: ${res.actionRecommendation}`);
+  console.log(`[Detected] ${res.vocalization} -> ${res.intent}`);
+  console.log(`Action: ${res.actionRecommendation}`);
 });
 
 stream.on('silence', () => {
-  console.log('Kondisi hening / tidak ada suara hewan.');
+  console.log('Ambient silence / no pet vocalization detected.');
 });
 
-// Masukkan chunk audio streaming (misal dari microphone PCM buffer)
+// Push streaming audio chunks (e.g., from microphone Float32Array PCM buffer)
 // stream.push(chunkFloat32Array);
 ```
 
 ---
 
-## 🚀 Quick Usage Concept (DX)
+## 🚀 Programmatic API (DX)
 
 ```typescript
 import { PetHertz } from '@pethertz/core';
 import { CatInterpreter } from '@pethertz/cat';
 
-// Inisialisasi engine
+// Initialize the engine
 const petHertz = new PetHertz({
   interpreter: new CatInterpreter()
 });
 
-// Analisis buffer audio (PCM / Float32Array dari Web Audio API atau Node.js)
+// Analyze audio buffer (PCM Float32Array from Web Audio API or Node.js)
 const analysis = await petHertz.analyze(audioBuffer, { sampleRate: 44100 });
 
 console.log(analysis);
@@ -137,43 +137,44 @@ console.log(analysis);
 //   vocalization: 'meow',
 //   intent: 'hunger_solicitation',
 //   confidence: 0.94,
+//   affectiveDimensions: { valence: 0.3, arousal: 0.6, urgency: 'moderate' },
 //   acousticMetrics: {
 //     fundamentalFrequencyHz: 740,
 //     intonationContour: 'rising',
 //     durationMs: 780
 //   },
-//   humanExplanation: 'Kucing meminta makan atau mencari perhatian dengan nada riang/mendesak.'
+//   humanExplanation: 'Food solicitation meow with rising intonation.',
+//   actionRecommendation: 'Check food bowl, water supply, or meal schedule.'
 // }
 ```
 
 ---
 
-## 🐾 Kamus & Katalog Terjemahan Intensi Hewan
+## 🐾 Ethological Intent & Affective Lexicon
 
-PetHertz memetakan fitur bioakustik ke dalam taksonomi emosi standar dua dimensi (*Valence-Arousal*, Russell & Schuller) lengkap dengan rekomendasi tindakan untuk *pawrent*:
+PetHertz maps bioacoustic features onto the two-dimensional circumplex model of affect (*Valence-Arousal*, Russell & Schuller) paired with actionable pet-parent guidance:
 
-### 🐱 Kucing (*Felis catus*)
-| Vokalisasi | Intensi (*Intent*) | Emosi (*Valence / Arousal*) | Urgensi | Terjemahan Bahasa Manusia | Rekomendasi Tindakan |
+### 🐱 Feline (*Felis catus*)
+| Vocalization | Inferred Intent | Affect (*Valence / Arousal*) | Urgency | Human Explanation | Recommended Action |
 | :--- | :--- | :---: | :---: | :--- | :--- |
-| **Meow** | `hunger_solicitation` | $+0.3$ / $0.6$ | Moderate | Meong nada naik (*rising*): meminta makan atau cemilan spesifik. | Periksa mangkuk makan/minum dan jadwal makan. |
-| **Meow** | `distress_isolation` | $-0.65$ / $0.65$ | Moderate | Meong panjang nada menurun (*falling*): kesepian, cemas, atau terjebak. | Hampiri kucing, periksa apakah pintu tertutup/terisolasi. |
-| **Meow** | `greeting_social` | $+0.7$ / $0.4$ | Low | Sapaan hangat dan ramah (*chirp / trill* ceria). | Balas menyapa dengan ramah dan ajak interaksi santai. |
-| **Purr** | `comfort_purring` | $+0.85$ / $0.15$ | Low | Dengkuran getaran tenang: relaksasi tinggi atau swa-penyembuhan. | Pertahankan suasana tenang, berikan belaian jika diinginkan. |
-| **Hiss** | `defense_warning` | $-0.8$ / $0.85$ | High | Desisan turbulen: merasa terancam, mempertahankan teritori. | Berikan ruang/jarak segera. Jangan dekati mendadak. |
-| **Chatter** | `hunting_frustration` | $+0.2$ / $0.7$ | Low | Ketukan gigi berulang: melihat mangsa (burung/serangga) di luar jendela. | Alihkan energi berburu dengan mainan tongkat bulu atau laser. |
-| **Yowl** | `pain_discomfort` | $-0.95$ / $0.95$ | Critical | Raungan tajam berkepanjangan: rasa sakit mendadak atau agresi tinggi. | Periksa kondisi fisik kucing apakah ada cedera atau luka. |
+| **Meow** | `hunger_solicitation` | $+0.3$ / $0.6$ | Moderate | Food solicitation meow with rising intonation. | Check food bowl, water supply, or meal schedule. |
+| **Meow** | `distress_isolation` | $-0.65$ / $0.65$ | Moderate | Distress or isolation call with falling intonation. | Locate cat; verify it is not trapped or isolated. |
+| **Meow** | `greeting_social` | $+0.7$ / $0.4$ | Low | Friendly, positive social greeting (*chirp / trill*). | Acknowledge with gentle verbal interaction or petting. |
+| **Purr** | `comfort_purring` | $+0.85$ / $0.15$ | Low | Low-frequency rhythmic purr signaling contentment or self-healing. | Maintain a calm environment; pet gently if desired. |
+| **Hiss** | `defense_warning` | $-0.8$ / $0.85$ | High | Defensive agonistic hiss signaling acute threat or boundary defense. | Give immediate physical space; do not corner or touch. |
+| **Chatter** | `hunting_frustration` | $+0.2$ / $0.7$ | Low | Predatory teeth-chattering directed at unreachable prey. | Redirect hunting arousal with feather wand or laser toy. |
+| **Yowl** | `pain_discomfort` | $-0.95$ / $0.95$ | Critical | High-intensity sustained yowl indicating severe pain or territorial distress. | Inspect physically for injuries or consult veterinarian immediately. |
 
-### 🐶 Anjing (*Canis familiaris*)
-| Vokalisasi | Intensi (*Intent*) | Emosi (*Valence / Arousal*) | Urgensi | Terjemahan Bahasa Manusia | Rekomendasi Tindakan |
+### 🐶 Canine (*Canis familiaris*)
+| Vocalization | Inferred Intent | Affect (*Valence / Arousal*) | Urgency | Human Explanation | Recommended Action |
 | :--- | :--- | :---: | :---: | :--- | :--- |
-| **Bark** | `alarm_threat` | $-0.4$ / $0.9$ | High | Gonggongan tempo cepat nada rendah: sinyal alarm / kehadiran orang asing. | Periksa area pintu, pagar, atau sumber kewaspadaan anjing. |
-| **Bark** | `playful_excitement` | $+0.8$ / $0.75$ | Low | Gonggongan nada tinggi modulasi ceria: ajakan bermain / antusiasme. | Ajak bermain lempar bola atau beri mainan favoritnya. |
-| **Bark** | `attention_seeking` | $+0.1$ / $0.5$ | Moderate | Gonggongan terisolasi nada sedang: meminta perhatian / minta keluar. | Periksa kebutuhan dasar: buang air, minum, atau jalan-jalan. |
-| **Growl** | `warning_aggression` | $-0.85$ / $0.8$ | High | Geraman rendah bergetar: peringatan teritorial / tidak nyaman. | Jangan diprovokasi. Berikan ruang untuk menenangkan diri. |
-| **Whine** | `anxiety_separation` | $-0.7$ / $0.75$ | High | Rintihan frekuensi tinggi harmonik: cemas perpisahan atau memohon bantuan. | Dekati dengan tenang, berikan rasa aman dan periksa pemicu stres. |
+| **Bark** | `alarm_threat` | $-0.4$ / $0.9$ | High | Fast-tempo, low-pitch alarm bark indicating perceived threat or intruder. | Inspect entry points, door, or yard to identify stimulus. |
+| **Bark** | `playful_excitement` | $+0.8$ / $0.75$ | Low | High-pitched, variable bark signaling play invitation and joyful arousal. | Engage in play with ball, tug toy, or interactive exercise. |
+| **Bark** | `attention_seeking` | $+0.1$ / $0.5$ | Moderate | Spaced, mid-pitch bark requesting attention, food, or bathroom break. | Check essential needs: bathroom break, water, or walking routine. |
+| **Growl** | `warning_aggression` | $-0.85$ / $0.8$ | High | Low-frequency guttural growl signaling territorial warning or discomfort. | Do not confront or punish; calmly remove provocative stimuli. |
+| **Whine** | `anxiety_separation` | $-0.7$ / $0.75$ | High | High-pitch tonal whine reflecting separation anxiety, stress, or begging. | Provide calm reassurance and investigate potential stress triggers. |
 
 ---
 
-## 📄 Lisensi
+## 📄 License
 MIT License
-

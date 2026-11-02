@@ -55,9 +55,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Kucing mengeluarkan getaran purring tenang. Menandakan relaksasi tinggi, rasa aman, atau proses swa-penyembuhan.',
+          'Low-frequency regular purring vibration detected. Indicates deep relaxation, contentment, or physiological self-healing.',
         actionRecommendation:
-          'Pertahankan suasana nyaman, berikan belaian lembut jika kucing menginginkannya.',
+          'Maintain a calm environment and offer gentle petting if desired by the cat.',
       };
     }
 
@@ -87,9 +87,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
           },
           acousticMetrics: features,
           humanExplanation:
-            'Getaran teratur frekuensi rendah (purring rileks atau swa-penyembuhan) terdeteksi.',
+            'Low-frequency regular vibration (calming or recuperative purring) detected.',
           actionRecommendation:
-            'Pertahankan suasana nyaman di sekitar kucing.',
+            'Observe the cat’s surroundings and maintain a reassuring environment.',
         };
       }
 
@@ -114,9 +114,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
           },
           acousticMetrics: features,
           humanExplanation:
-            'Suara geraman (growl) kucing terdeteksi (frekuensi 140-240 Hz dengan resonansi tubuh kecil). Menandakan peringatan defensif atau ancaman wilayah.',
+            'Agonistic cat growl detected (low fundamental frequency 140-240 Hz with small body resonance). Indicates defensive warning or territorial threat.',
           actionRecommendation:
-            'Jaga jarak dari kucing, jangan memprovokasi atau mendekati secara mendadak.',
+            'Maintain distance from the cat; avoid sudden movements or provocation.',
         };
       }
 
@@ -134,9 +134,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal frekuensi rendah (75 - 240 Hz) berada di zona non-fonatori kucing. Suara berasal dari dengkuran/batuk manusia atau dengung motor listrik.',
+          'Low-frequency signal (75 - 240 Hz) falls within the feline non-phonatory dead zone. Signal originates from human snoring, coughing, or electrical hum.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal bukan suara kucing.',
+          'No action required. Signal is not a feline vocalization.',
       };
     }
 
@@ -166,9 +166,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Karakteristik resonansi vokal (F1 < 850 Hz dengan VTL manusia > 9.0 cm pada F0 rendah) adalah anatomi saluran vokal manusia, bukan kucing.',
+          'Vocal tract resonance characteristics (human F1 < 850 Hz with VTL > 9.0 cm at low F0) indicate human respiratory/vocal anatomy, not a cat.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal berasal dari suara/batuk/bersin manusia.',
+          'No action required. Signal originates from human vocal/respiratory sound.',
       };
     }
 
@@ -193,9 +193,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal terdeteksi sebagai tangisan bayi manusia (sob bursts konvulsi >= 10), bukan vokalisasi kucing.',
+          'Signal identified as human infant crying or shrieking (prolonged duration with piercing treble centroid), not a feline call.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal berasal dari suara tangisan bayi.',
+          'No action required. Signal originates from human crying or voice.',
       };
     }
 
@@ -217,9 +217,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal terdeteksi sebagai bunyi bersin frekuensi ultra-tinggi atau peluit buatan, bukan vokalisasi kucing.',
+          'Signal identified as an ultra-high frequency human sneeze friction or whistle, not a feline vocalization.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal bukan suara kucing.',
+          'No action required. Signal is not a cat call.',
       };
     }
 
@@ -238,9 +238,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Estimasi resonator akustik (< 3.2 cm) tidak sesuai dengan anatomi mamalia kucing. Sinyal berasal dari klakson atau resonator mainan.',
+          'Acoustic cavity estimate (< 3.2 cm) is inconsistent with feline mammal anatomy. Signal originates from an artificial resonator or horn.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal bukan suara kucing.',
+          'No action required. Signal is not a cat call.',
       };
     }
 
@@ -265,9 +265,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Suara hissing terdeteksi (atonal turbulen). Kucing merasa terancam, terpojok, atau mempertahankan wilayahnya.',
+          'Turbulent atonal hissing detected. The cat feels threatened, cornered, or is defending its territory.',
         actionRecommendation:
-          'Segera beri ruang/jarak. Jangan mencoba menyentuh atau mendekati secara mendadak.',
+          'Immediately grant physical space. Do not attempt sudden physical contact.',
       };
     }
 
@@ -286,9 +286,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Suara chattering (ketukan gigi berulang). Menandakan rangsangan visual mangsa yang terhalang (misal melihat burung di luar jendela).',
+          'Repetitive chatter / teeth-clicking detected. Indicates hunting excitement or visual prey frustration (e.g., watching birds through a window).',
         actionRecommendation:
-          'Alihkan energinya dengan mainan berburu (seperti tongkat bulu atau laser mainan).',
+          'Redirect predatory arousal with an interactive wand or laser toy.',
       };
     }
 
@@ -307,9 +307,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Suara meraung tajam berkepanjangan terdeteksi. Mengindikasikan rasa sakit mendadak atau tingkat agresi tinggi.',
+          'High-intensity sharp yowl detected. Indicates acute pain, extreme distress, or intense aggression.',
         actionRecommendation:
-          'Periksa kondisi fisik kucing apakah ada luka, terjepit, atau gejala sakit.',
+          'Check the cat for injuries, entrapment, or physical distress immediately.',
       };
     }
 
@@ -344,9 +344,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Vokalisasi meong singkat bernada riang. Merupakan salam sapaan hangat kepada pemilik.',
+          'Short cheerful chirp or trill vocalization detected. Friendly social greeting to owner or companion.',
         actionRecommendation:
-          'Sapa balik dengan suara ramah dan ajak berinteraksi santai.',
+          'Acknowledge with a warm, friendly tone and engage in gentle interaction.',
       };
     }
 
@@ -380,9 +380,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Meong dengan intonasi naik di akhir nada (rising intonation). Karakteristik kuat dari permintaan makanan atau perhatian spesifik.',
+          'Meow with rising terminal intonation contour. Characteristic of food solicitation or targeted attention seeking.',
         actionRecommendation:
-          'Periksa jadwal makan dan mangkuk makan/minum kucing.',
+          'Check feeding schedule and water bowl.',
       };
     }
 
@@ -407,9 +407,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Meong panjang dengan intonasi menurun (falling intonation). Mengindikasikan kesepian, cemas, atau ketidaknyamanan lingkungan.',
+          'Extended meow with falling intonation contour. Indicates loneliness, separation anxiety, or environmental discomfort.',
         actionRecommendation:
-          'Hampiri kucing, periksa apakah pintu tertutup atau kucing terisolasi dari area favoritnya.',
+          'Approach the cat and check whether doors are closed or if it is isolated from favored territory.',
       };
     }
 
@@ -435,9 +435,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Vokalisasi meong standar dalam rentang nada netral.',
+          'Standard feline meow vocalization within neutral pitch and duration boundaries.',
         actionRecommendation:
-          'Perhatikan bahasa tubuh kucing (posisi ekor dan telinga) untuk konfirmasi kontekstual tambahan.',
+          'Observe tail and ear postures for contextual confirmation.',
       };
     }
 
@@ -461,9 +461,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Sinyal terdeteksi sebagai tangisan bayi manusia atau jeritan berdurasi panjang (> 2.8s dengan spektrum tinggi), bukan vokalisasi kucing.',
+          'Signal matches prolonged human infant crying or shrieking (> 2.8s with treble spectrum), not a feline vocalization.',
         actionRecommendation:
-          'Tidak ada tindakan diperlukan. Sinyal berasal dari suara tangisan manusia.',
+          'No action required. Signal originates from human crying or voice.',
       };
     }
 
@@ -489,9 +489,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Vokalisasi kucing terdeteksi dengan variasi modulasi atau resonansi akustik alami.',
+          'Feline vocalization detected with natural acoustic modulation variation.',
         actionRecommendation:
-          'Perhatikan bahasa tubuh kucing (posisi ekor dan telinga) untuk konfirmasi kontekstual tambahan.',
+          'Observe cat posture and environment for additional behavioral context.',
       };
     }
 
@@ -508,9 +508,9 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       },
       acousticMetrics: features,
       humanExplanation:
-        'Sinyal akustik tidak cocok dengan pola vokalisasi kucing yang valid.',
+        'Acoustic signal does not match valid feline vocalization patterns.',
       actionRecommendation:
-        'Tidak ada tindakan diperlukan. Sinyal bukan vokalisasi kucing.',
+        'No action required. Signal is not a feline vocalization.',
     };
   }
 }

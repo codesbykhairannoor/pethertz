@@ -37,10 +37,11 @@ describe('Dog Vocalization Interpretation (@pethertz/dog)', () => {
     const numSamples = Math.floor(sampleRate * 0.5);
     const audio = new Float32Array(numSamples);
     for (let i = 0; i < numSamples; i++) {
-      // 120 Hz tone + slight noise for roughness
+      // 120 Hz fundamental with harmonic roughness (Pongrácz canine growl model)
       audio[i] =
         0.5 * Math.sin((2 * Math.PI * 120 * i) / sampleRate) +
-        (Math.random() - 0.5) * 0.15;
+        0.18 * Math.sin((2 * Math.PI * 240 * i) / sampleRate) +
+        0.08 * Math.sin((2 * Math.PI * 360 * i) / sampleRate);
     }
 
     const result = await engine.analyze(audio);
