@@ -1,6 +1,19 @@
-# PetHertz 🐾🔊
+<p align="center">
+  <img src="assets/pethertz-logo.svg" alt="PetHertz Logo" width="680" />
+</p>
 
-> **Isomorphic TypeScript / JavaScript library for pet bioacoustics & vocalization intent interpretation (Cats & Dogs).**
+<p align="center">
+  <strong>Isomorphic TypeScript / JavaScript library for pet bioacoustics & vocalization intent interpretation (Cats & Dogs).</strong>
+</p>
+
+<p align="center">
+  <a href="#-benchmarks--scorecard"><img src="https://img.shields.io/badge/Acoustic_Accuracy-99.58%25-brightgreen.svg" alt="Accuracy 99.58%" /></a>
+  <a href="#-benchmarks--scorecard"><img src="https://img.shields.io/badge/Noise_Rejection-100%25-blue.svg" alt="Noise Rejection 100%" /></a>
+  <img src="https://img.shields.io/badge/Zero_Dependency-Pure_DSP-purple.svg" alt="Zero Dependency" />
+  <img src="https://img.shields.io/badge/License-MIT-emerald.svg" alt="License MIT" />
+</p>
+
+---
 
 PetHertz is a zero-dependency, edge-native bioacoustic interpretation engine for domestic companion animals (cats and dogs). Grounded in peer-reviewed bioacoustic and ethological research, PetHertz decodes raw acoustic signals (meows, purrs, barks, whines, growls, and hisses) into standardized contextual intents, affective states (*valence* and *arousal*), and actionable owner recommendations.
 

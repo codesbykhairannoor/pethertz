@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#141B2D" />
+      <stop offset="50%" stop-color="#0B0F17" />
+      <stop offset="100%" stop-color="#05070B" />
+    </radialGradient>
+
+    <!-- Ambient Glow Behind Paw -->
+    <radialGradient id="ambientGlow" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.22" />
+      <stop offset="60%" stop-color="#6366F1" stop-opacity="0.10" />
+      <stop offset="100%" stop-color="#0B0F17" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Primary Acoustic Gradient (Electric Cyan to Neon Indigo) -->
+    <linearGradient id="pethertzGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="45%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#6366F1" />
+    </linearGradient>
+
+    <!-- Secondary Wave Gradient -->
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#38BDF8" stop-opacity="1" />
+      <stop offset="100%" stop-color="#818CF8" stop-opacity="0.8" />
+    </linearGradient>
+
+    <!-- Subtle Drop Shadow -->
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#06B6D4" flood-opacity="0.28" />
+    </filter>
+  </defs>
+
+  <!-- Base Rounded Container (App Icon Squircle) -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect width="508" height="508" x="2" y="2" rx="110" fill="none" stroke="#1E293B" stroke-width="1.5" />
+
+  <!-- Ambient Light Emission -->
+  <circle cx="256" cy="245" r="180" fill="url(#ambientGlow)" />
+
+  <!-- Concentric Bioacoustic Ripple Rings (Subtle Radar / Sound Field) -->
+  <circle cx="256" cy="290" r="190" fill="none" stroke="#22D3EE" stroke-width="1" stroke-opacity="0.07" stroke-dasharray="4 8" />
+  <circle cx="256" cy="290" r="145" fill="none" stroke="#6366F1" stroke-width="1" stroke-opacity="0.12" stroke-dasharray="6 6" />
+
+  <!-- The PetHertz Geometric Paw & Harmonic Resonators -->
+  <g filter="url(#subtleGlow)">
+
+    <!-- TOE 1 (Far Left - 250 Hz Low-Mid Frequency Capsule) -->
+    <g transform="translate(132, 192) rotate(-34)">
+      <rect x="-18" y="-40" width="36" height="80" rx="18" fill="url(#pethertzGrad)" />
+      <!-- Internal frequency slit -->
+      <line x1="0" y1="-20" x2="0" y2="20" stroke="#0B0F17" stroke-width="3" stroke-linecap="round" stroke-opacity="0.6" />
+    </g>
+
+    <!-- TOE 2 (Center Left - 1000 Hz Peak Resonance Capsule) -->
+    <g transform="translate(208, 142) rotate(-11)">
+      <rect x="-21" y="-54" width="42" height="108" rx="21" fill="url(#pethertzGrad)" />
+      <!-- Dynamic soundwave ridges inside pad -->
+      <line x1="0" y1="-32" x2="0" y2="32" stroke="#0B0F17" stroke-width="3.5" stroke-linecap="round" stroke-opacity="0.6" />
+    </g>
+
+    <!-- TOE 3 (Center Right - 2000 Hz Harmonic Overtone Capsule) -->
+    <g transform="translate(304, 142) rotate(11)">
+      <rect x="-21" y="-54" width="42" height="108" rx="21" fill="url(#pethertzGrad)" />
+      <!-- Dynamic soundwave ridges inside pad -->
+      <line x1="0" y1="-32" x2="0" y2="32" stroke="#0B0F17" stroke-width="3.5" stroke-linecap="round" stroke-opacity="0.6" />
+    </g>
+
+    <!-- TOE 4 (Far Right - 4000 Hz Treble Resonance Capsule) -->
+    <g transform="translate(380, 192) rotate(34)">
+      <rect x="-18" y="-40" width="36" height="80" rx="18" fill="url(#pethertzGrad)" />
+      <!-- Internal frequency slit -->
+      <line x1="0" y1="-20" x2="0" y2="20" stroke="#0B0F17" stroke-width="3" stroke-linecap="round" stroke-opacity="0.6" />
+    </g>
+
+    <!-- MAIN PALM PAD (Metacarpal Resonant Body with Integrated Hz Waveform) -->
+    <!-- Smooth organic geometric heart-pad -->
+    <path d="M 256 228
+             C 210 228, 160 252, 160 305
+             C 160 355, 205 385, 235 396
+             C 248 401, 264 401, 277 396
+             C 307 385, 352 355, 352 305
+             C 352 252, 302 228, 256 228 Z"
+          fill="url(#pethertzGrad)" />
+
+    <!-- Pure Negative-Space Sine Hertz Waveform Cutting Across The Pad -->
+    <!-- Represents Fundamental Frequency F0 Oscilloscope Track -->
+    <path d="M 182 312 
+             C 200 312, 212 280, 228 280
+             C 242 280, 248 344, 264 344
+             C 278 344, 286 296, 298 296
+             C 310 296, 318 312, 330 312"
+          fill="none" 
+          stroke="#0B0F17" 
+          stroke-width="9" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Inner Core Luminous Frequency Node -->
+    <circle cx="228" cy="280" r="3.5" fill="#22D3EE" />
+    <circle cx="264" cy="344" r="3.5" fill="#6366F1" />
+  </g>
+
+  <!-- Precision Audio Sub-mark (Hertz Pulse Line Below Paw) -->
+  <path d="M 170 435 L 210 435 L 222 418 L 238 452 L 254 425 L 266 442 L 278 435 L 342 435" 
+        fill="none" 
+        stroke="url(#waveGrad)" 
+        stroke-width="2.5" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        stroke-opacity="0.75" />
+
+</svg>

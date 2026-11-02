@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetHertz - Brand Identity & Logo Showcase</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #090D16;
+      color: #E2E8F0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      max-width: 960px;
+      width: 100%;
+    }
+    header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.lead {
+      color: #94A3B8;
+      font-size: 1.05rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-bottom: 32px;
+    }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: #0F172A;
+      border: 1px solid #1E293B;
+      border-radius: 20px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .card.light {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      color: #0F172A;
+    }
+    .card.light .card-title { color: #0F172A; }
+    .card.light .card-desc { color: #64748B; }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #F8FAFC;
+      align-self: flex-start;
+    }
+    .card-desc {
+      font-size: 0.88rem;
+      color: #94A3B8;
+      margin-bottom: 24px;
+      align-self: flex-start;
+    }
+    .preview-box {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      border-radius: 14px;
+    }
+    .full-width {
+      grid-column: 1 / -1;
+    }
+    .favicon-row {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(34, 211, 238, 0.12);
+      color: #22D3EE;
+      margin-bottom: 12px;
+      border: 1px solid rgba(34, 211, 238, 0.25);
+    }
+    .specs {
+      margin-top: 32px;
+      background: #0B0F19;
+      border: 1px solid #1E293B;
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .specs h3 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      color: #38BDF8;
+    }
+    .specs ul {
+      padding-left: 20px;
+      color: #94A3B8;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">Brand Identity Design</span>
+      <h1>PetHertz Official Vector Logo</h1>
+      <p class="lead">Acoustic Resonance &times; Geometric Interspecies Bioacoustics</p>
+    </header>
+
+    <!-- Full Banner Logo -->
+    <div class="card full-width" style="margin-bottom: 28px;">
+      <div class="card-title">Full Horizontal Brand Lockup</div>
+      <div class="card-desc">Ideal for GitHub README Header, Website Navbar, and Official Documentation</div>
+      <div class="preview-box">
+        <img src="pethertz-logo.svg" alt="PetHertz Full Logo" style="max-width: 100%; width: 720px; height: auto;" />
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- App Icon Squircle -->
+      <div class="card">
+        <div class="card-title">App Icon / GitHub Avatar (512x512)</div>
+        <div class="card-desc">Squircle container with ambient frequency glow for mobile icons & npm avatar</div>
+        <div class="preview-box">
+          <img src="pethertz-icon.svg" alt="PetHertz App Icon" style="width: 220px; height: 220px; border-radius: 48px; box-shadow: 0 16px 40px rgba(0,0,0,0.6);" />
+        </div>
+      </div>
+
+      <!-- Favicon Scaling -->
+      <div class="card">
+        <div class="card-title">Multi-Resolution Crispness (Favicons)</div>
+        <div class="card-desc">Legible and distinctive from 128px down to 24px micro-size</div>
+        <div class="favicon-row" style="margin-top: 20px;">
+          <div style="text-align: center;">
+            <img src="pethertz-icon.svg" width="96" height="96" style="border-radius: 20px;" /><br>
+            <span style="font-size: 12px; color: #64748B;">96px</span>
+          </div>
+          <div style="text-align: center;">
+            <img src="pethertz-icon.svg" width="64" height="64" style="border-radius: 14px;" /><br>
+            <span style="font-size: 12px; color: #64748B;">64px</span>
+          </div>
+          <div style="text-align: center;">
+            <img src="pethertz-icon.svg" width="36" height="36" style="border-radius: 8px;" /><br>
+            <span style="font-size: 12px; color: #64748B;">36px</span>
+          </div>
+          <div style="text-align: center;">
+            <img src="pethertz-icon.svg" width="20" height="20" style="border-radius: 4px;" /><br>
+            <span style="font-size: 12px; color: #64748B;">20px</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Design Specification -->
+    <div class="specs">
+      <h3>🎨 Philosophy of the Design (Why it doesn't look AI-generated):</h3>
+      <ul>
+        <li><strong>No Cheap AI Cliches:</strong> No 3D metallic chrome reflections, no generic cyborg robot dogs, and no clip-art cartoon cats with headphones.</li>
+        <li><strong>Pure Geometric Semantics:</strong> The 4 toe pads are designed as <em>harmonic audio frequency capsules</em> (tuned to the 250Hz, 1kHz, 2kHz, and 4kHz domestic vocalization bands).</li>
+        <li><strong>The Negative-Space Hertz Wave:</strong> Cutting across the central metacarpal pad is a clean, mathematical <em>Fundamental Frequency (F0) sine wave</em>.</li>
+        <li><strong>Color Palette:</strong> Electric Cyan (<code>#22D3EE</code>) transitioning into Deep Indigo/Violet (<code>#6366F1</code>) — evoking signal precision, digital audio workstations (DAW), and modern developer tooling.</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
