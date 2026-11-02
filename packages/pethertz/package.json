@@ -1,0 +1,55 @@
+{
+  "name": "pethertz",
+  "version": "0.1.0",
+  "description": "Autonomous pet bioacoustics and vocalization interpretation engine (Cats & Dogs)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "pethertz": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codesbykhairannoor/pethertz.git",
+    "directory": "packages/pethertz"
+  },
+  "bugs": {
+    "url": "https://github.com/codesbykhairannoor/pethertz/issues"
+  },
+  "homepage": "https://github.com/codesbykhairannoor/pethertz#readme",
+  "dependencies": {
+    "@pethertz/cat": "^0.1.0",
+    "@pethertz/core": "^0.1.0",
+    "@pethertz/dog": "^0.1.0"
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "keywords": [
+    "pethertz",
+    "pet-translator",
+    "cat-translator",
+    "dog-translator",
+    "bioacoustics",
+    "audio-dsp",
+    "pitch-detection",
+    "yin-algorithm",
+    "animal-audio"
+  ],
+  "author": "PetHertz Open Source Contributors",
+  "license": "MIT"
+}
