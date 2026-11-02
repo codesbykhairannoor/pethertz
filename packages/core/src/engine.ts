@@ -3,6 +3,7 @@ import {
   AudioInputData,
   PetAcousticFeatures,
   PetAnalysisResult,
+  PetEvent,
   PetInterpreter,
   QualityFlag,
 } from './types/index.js';
@@ -23,9 +24,10 @@ import { estimateVocalTractDimensions } from './dsp/formants.js';
 import { extractMfcc } from './dsp/mfcc.js';
 import { decodeWav } from './io/wav.js';
 import { PetStreamAnalyzer, StreamAnalyzerOptions } from './stream/StreamAnalyzer.js';
+import { UniversalPetInterpreter } from './UniversalPetInterpreter.js';
 
 export interface PetHertzConfig<TIntent = string, TVocalization = string> {
-  interpreter: PetInterpreter<TIntent, TVocalization>;
+  interpreter?: PetInterpreter<TIntent, TVocalization>;
   defaultSampleRate?: number;
 }
 
@@ -33,26 +35,55 @@ export class PetHertz<TIntent = string, TVocalization = string> {
   readonly interpreter: PetInterpreter<TIntent, TVocalization>;
   readonly defaultSampleRate: number;
 
-  constructor(config: PetHertzConfig<TIntent, TVocalization>) {
-    this.interpreter = config.interpreter;
-    this.defaultSampleRate = config.defaultSampleRate ?? 44100;
+  constructor(config?: Partial<PetHertzConfig<TIntent, TVocalization>>) {
+    this.interpreter =
+      config?.interpreter ??
+      (new UniversalPetInterpreter() as unknown as PetInterpreter<TIntent, TVocalization>);
+    this.defaultSampleRate = config?.defaultSampleRate ?? 44100;
   }
 
   /**
-   * Analyzes raw audio data and returns bioacoustic features + interpreted intent.
-   * Supports Float32Array from Web Audio API or Node.js PCM buffers.
+   * Analyzes raw audio data or WAV file bytes and returns bioacoustic features + interpreted intent.
+   * Supports:
+   *  - Float32Array / number[] (normalized PCM samples)
+   *  - Uint8Array / ArrayBuffer / Buffer (raw WAV file bytes - auto-decodes header & sample rate)
    */
   async analyze(
     audioData: AudioInputData,
     options?: Partial<AnalyzeOptions>
   ): Promise<PetAnalysisResult<TIntent, TVocalization>> {
+    // 0. Auto-detect and decode RIFF/WAVE byte buffers
+    if (
+      audioData instanceof ArrayBuffer ||
+      audioData instanceof Uint8Array ||
+      (typeof Buffer !== 'undefined' && Buffer.isBuffer(audioData))
+    ) {
+      const bytes =
+        audioData instanceof Uint8Array ? audioData : new Uint8Array(audioData as ArrayBuffer);
+
+      // Check for RIFF identifier
+      if (
+        bytes.length >= 12 &&
+        bytes[0] === 0x52 && // 'R'
+        bytes[1] === 0x49 && // 'I'
+        bytes[2] === 0x46 && // 'F'
+        bytes[3] === 0x46    // 'F'
+      ) {
+        const decoded = decodeWav(bytes);
+        return this.analyze(decoded.audioData, {
+          sampleRate: decoded.sampleRate,
+          ...options,
+        });
+      }
+    }
+
     const sampleRate = options?.sampleRate ?? this.defaultSampleRate;
     const minFreq =
       options?.minFrequency ?? (this.interpreter.species === 'dog' ? 65 : 20);
     const maxFreq = options?.maxFrequency ?? 3500;
 
     const rawArray =
-      audioData instanceof Float32Array ? audioData : new Float32Array(audioData);
+      audioData instanceof Float32Array ? audioData : new Float32Array(audioData as number[]);
 
     // 0. DC Offset Removal (High-Pass Filter at ~15 Hz)
     // Eliminates electrical hum, microphone drift, and DC bias (prevents flat DC from being mistaken as purr)
@@ -100,18 +131,23 @@ export class PetHertz<TIntent = string, TVocalization = string> {
       }
       const frameRms = Math.sqrt(frameSq / windowFrame.length);
 
-      const yinRes = detectPitchYin(windowFrame, {
-        sampleRate,
-        minFrequency: minFreq,
-        maxFrequency: maxFreq,
-      });
+      if (frameRms >= 0.005) {
+        const pitchRes = detectPitchYin(windowFrame, {
+          sampleRate,
+          minFrequency: minFreq,
+          maxFrequency: maxFreq,
+          threshold: 0.15,
+        });
 
-      if (yinRes.frequencyHz > 0 && yinRes.confidence > 0.4 && frameRms > 0.003) {
-        pitchTrajectory.push(yinRes.frequencyHz);
-        sumWeightedF0 += yinRes.frequencyHz * frameRms;
-        totalF0Weight += frameRms;
-        sumConfidence += yinRes.confidence;
-        voicedCount++;
+        if (pitchRes.frequencyHz > 0 && pitchRes.confidence > 0.4) {
+          pitchTrajectory.push(pitchRes.frequencyHz);
+          sumWeightedF0 += pitchRes.frequencyHz * frameRms;
+          totalF0Weight += frameRms;
+          sumConfidence += pitchRes.confidence;
+          voicedCount++;
+        } else {
+          pitchTrajectory.push(0);
+        }
       } else {
         pitchTrajectory.push(0);
       }
@@ -122,50 +158,47 @@ export class PetHertz<TIntent = string, TVocalization = string> {
     const pitchConfidence =
       voicedCount > 0 ? Math.round((sumConfidence / voicedCount) * 100) / 100 : 0;
 
-    // 4. Intonation Contour Extraction (Schötz 2023)
+    // Pitch Modulation Contour Analysis
     const intonationContour = analyzePitchContour(pitchTrajectory);
     const pitchJitter = calculatePitchJitter(pitchTrajectory);
     const octaveJumpRatio = calculateOctaveJumpRatio(pitchTrajectory);
 
-    // 5. Native Formant & MFCC Extraction (Acoustic Allometry & Timbre Analysis)
-    // Pass fundamentalFrequencyHz as f0Hint to detect high F0 harmonic locking hazard
+    // 4. Acoustic Allometry & Formant Extraction (LPC + Levinson-Durbin)
     const formants = estimateVocalTractDimensions(dataArray, sampleRate, fundamentalFrequencyHz);
+
+    // 5. 13-Band MFCC & Wiener Spectral Flatness Timbre Analysis
     const mfcc = extractMfcc(dataArray, sampleRate);
 
-    // 6. Audio Quality Flags Extraction
+    // 6. Quality Flags Audit
     const qualityFlags: QualityFlag[] = [];
 
-    // Check clipping
-    let isClipped = false;
-    for (let s = 0; s < dataArray.length; s++) {
-      if (Math.abs(dataArray[s]!) >= 0.99) {
-        isClipped = true;
-        break;
-      }
-    }
-    if (isClipped) qualityFlags.push('clipping');
-
-    // Check low SNR / low pitch confidence
-    if ((rms < 0.015 && rms >= 0.003) || (pitchConfidence < 0.55 && voicedCount > 0)) {
+    // Check low SNR
+    if (rms < 0.012 && rms >= 0.003) {
       qualityFlags.push('low_snr');
     }
 
-    // Check high F0 LPC harmonic lock
+    // Check digital clipping / saturation
+    let peak = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      const absVal = Math.abs(dataArray[i]!);
+      if (absVal > peak) peak = absVal;
+    }
+    if (peak > 0.98) {
+      qualityFlags.push('clipping');
+    }
+
+    // Check harmonic locking
     if (formants.isHarmonicLocked) {
       qualityFlags.push('high_f0_lpc_harmonic_lock');
     }
 
     // Check borderline VTL
-    if (
-      formants.vtlConfidence !== undefined &&
-      formants.vtlConfidence < 0.6 &&
-      (formants.estimatedVocalTractLengthCm ?? 0) > 0
-    ) {
+    if (formants.vtlConfidence < 0.5 && formants.estimatedVocalTractLengthCm > 0) {
       qualityFlags.push('borderline_vtl');
     }
 
     // Check chaotic intonation
-    if (octaveJumpRatio > 0.4 || pitchJitter > 0.35) {
+    if (octaveJumpRatio > 0.35 || pitchJitter > 0.35) {
       qualityFlags.push('chaotic_intonation');
     }
 
@@ -225,6 +258,7 @@ export class PetHertz<TIntent = string, TVocalization = string> {
           humanExplanation: `Signal detected at borderline bioacoustic plausibility threshold (score: ${(gatekeeper.biologicalPlausibilityScore * 100).toFixed(0)}%). Quality flags: [${qualityFlags.join(', ')}]. ${this.getGatekeeperExplanation(gatekeeper.rejectionReason)}`,
           actionRecommendation:
             'Re-record audio closer to the pet in a quieter environment without background interference.',
+          events: [],
         };
       }
 
@@ -244,14 +278,34 @@ export class PetHertz<TIntent = string, TVocalization = string> {
         humanExplanation: this.getGatekeeperExplanation(gatekeeper.rejectionReason),
         actionRecommendation:
           'No action required. The detected audio is not a domestic pet vocalization.',
+        events: [],
       };
     }
 
-    // 9. Delegate to Species-Specific Rules Interpreter
+    // 9. Delegate to Rules Interpreter
     const interpreted = this.interpreter.interpret(acousticMetrics);
+
+    // 10. Temporal Multi-Event Timeline Segmentation
+    const events: PetEvent<TIntent, TVocalization>[] = [];
+    if (segmentation.bursts.length > 0) {
+      for (const burst of segmentation.bursts) {
+        events.push({
+          startMs: Math.round((burst.startSample / sampleRate) * 1000),
+          endMs: Math.round((burst.endSample / sampleRate) * 1000),
+          durationMs: burst.durationMs,
+          vocalization: interpreted.vocalization,
+          intent: interpreted.intent,
+          confidence: interpreted.confidence,
+          affectiveDimensions: interpreted.affectiveDimensions,
+          fundamentalFrequencyHz,
+        });
+      }
+    }
+
     return {
       ...interpreted,
       qualityFlags,
+      events,
     };
   }
 
@@ -305,7 +359,7 @@ export class PetHertz<TIntent = string, TVocalization = string> {
     } catch (err: any) {
       if (err?.code === 'ERR_MODULE_NOT_FOUND' || typeof window !== 'undefined') {
         throw new Error(
-          'Metode analyzeFile() hanya dapat digunakan di environment Node.js. Gunakan analyzeWav() untuk browser.'
+          'The analyzeFile() method is only available in Node.js environments. Use analyzeWav() or analyze() in browsers.'
         );
       }
       throw err;

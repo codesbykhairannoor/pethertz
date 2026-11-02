@@ -72,10 +72,11 @@ PetHertz is built on **linear DSP mathematics and comparative bioacoustic allome
 Analyze and inspect WAV audio files directly from the command line:
 
 ```bash
-# Analyze a cat vocalization
-pethertz analyze cat_meow.wav --species cat
+# Analyze any audio file (auto-detects species: cat vs dog)
+pethertz analyze sound.wav
 
-# Analyze a dog bark with raw JSON output
+# Force specific species or output clean JSON
+pethertz analyze cat_meow.wav --species cat
 pethertz analyze dog_bark.wav --species dog --json
 
 # Inspect raw bioacoustic metrics (F0, intonation, RMS, ZCR, spectral centroid, VTL)
@@ -94,16 +95,18 @@ For real-time companion animal monitoring applications (smart pet cameras, edge 
 
 ```typescript
 import { PetHertz } from '@pethertz/core';
-import { CatInterpreter } from '@pethertz/cat';
 
-const engine = new PetHertz({ interpreter: new CatInterpreter() });
+// Zero-config initialization: auto-routes between cat and dog bioacoustics
+const engine = new PetHertz();
+
 const stream = engine.createStreamAnalyzer({
   windowDurationSec: 1.5,
-  debounceMs: 500
+  debounceMs: 500,
+  confidenceThreshold: 0.70, // Filter out low-confidence bursts
 });
 
 stream.on('vocalization', (res) => {
-  console.log(`[Detected] ${res.vocalization} -> ${res.intent}`);
+  console.log(`[${res.species.toUpperCase()}] ${res.vocalization} -> ${res.intent}`);
   console.log(`Action: ${res.actionRecommendation}`);
 });
 
@@ -111,29 +114,34 @@ stream.on('silence', () => {
   console.log('Ambient silence / no pet vocalization detected.');
 });
 
-// Push streaming audio chunks (e.g., from microphone Float32Array PCM buffer)
+// Power management for IoT battery devices:
+// stream.pause();
+// stream.resume();
+
+// Push streaming audio chunks (e.g. from Web Audio ScriptProcessor or microphone PCM)
 // stream.push(chunkFloat32Array);
 ```
 
 ---
 
-## 🚀 Programmatic API (DX)
+## 🚀 Programmatic API & Effortless Developer Experience (DX)
+
+PetHertz provides zero-friction analysis for raw PCM buffers or directly from WAV file bytes:
 
 ```typescript
 import { PetHertz } from '@pethertz/core';
-import { CatInterpreter } from '@pethertz/cat';
+import { readFile } from 'node:fs/promises';
 
-// Initialize the engine
-const petHertz = new PetHertz({
-  interpreter: new CatInterpreter()
-});
+// 1. Initialize with zero boilerplate (Auto-detects species via acoustic allometry)
+const petHertz = new PetHertz();
 
-// Analyze audio buffer (PCM Float32Array from Web Audio API or Node.js)
-const analysis = await petHertz.analyze(audioBuffer, { sampleRate: 44100 });
+// 2. Direct WAV analysis in one line (auto-decodes RIFF header & sample rate)
+const wavBuffer = await readFile('pet_audio.wav');
+const analysis = await petHertz.analyze(wavBuffer);
 
 console.log(analysis);
 // {
-//   species: 'cat',
+//   species: 'cat',                             // Auto-detected 'cat' or 'dog'!
 //   vocalization: 'meow',
 //   intent: 'hunger_solicitation',
 //   confidence: 0.94,
@@ -141,8 +149,12 @@ console.log(analysis);
 //   acousticMetrics: {
 //     fundamentalFrequencyHz: 740,
 //     intonationContour: 'rising',
-//     durationMs: 780
+//     durationMs: 780,
+//     estimatedVocalTractLengthCm: 5.2
 //   },
+//   events: [                                   // Multi-event timeline!
+//     { startMs: 0, endMs: 780, durationMs: 780, vocalization: 'meow', intent: 'hunger_solicitation' }
+//   ],
 //   humanExplanation: 'Food solicitation meow with rising intonation.',
 //   actionRecommendation: 'Check food bowl, water supply, or meal schedule.'
 // }

@@ -20,7 +20,7 @@ export function decodeWav(buffer: ArrayBuffer | Uint8Array): DecodedAudio {
   const wave = String.fromCharCode(view.getUint8(8), view.getUint8(9), view.getUint8(10), view.getUint8(11));
 
   if (riff !== 'RIFF' || wave !== 'WAVE') {
-    throw new Error('Format audio tidak valid: Header WAV/RIFF tidak ditemukan.');
+    throw new Error('Invalid audio format: RIFF/WAVE header not found.');
   }
 
   // 2. Parse Sub-chunks
@@ -56,7 +56,7 @@ export function decodeWav(buffer: ArrayBuffer | Uint8Array): DecodedAudio {
   }
 
   if (dataOffset === -1) {
-    throw new Error('Chunk "data" tidak ditemukan dalam file WAV.');
+    throw new Error('Corrupt WAV file: "data" chunk not found.');
   }
 
   // 3. Decode Samples to Normalized Mono Float32Array

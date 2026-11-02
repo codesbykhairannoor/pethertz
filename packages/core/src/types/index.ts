@@ -87,6 +87,17 @@ export interface PetAcousticFeatures {
   qualityFlags?: QualityFlag[];
 }
 
+export interface PetEvent<TIntent = string, TVocalization = string> {
+  startMs: number;
+  endMs: number;
+  durationMs: number;
+  vocalization: TVocalization;
+  intent: TIntent;
+  confidence: number;
+  affectiveDimensions?: AffectiveDimensions;
+  fundamentalFrequencyHz?: number;
+}
+
 export interface PetAnalysisResult<TIntent = string, TVocalization = string> {
   species: SpeciesType;
   vocalization: TVocalization;
@@ -98,6 +109,7 @@ export interface PetAnalysisResult<TIntent = string, TVocalization = string> {
   humanExplanation: string;
   actionRecommendation: string;
   qualityFlags?: QualityFlag[];
+  events?: PetEvent<TIntent, TVocalization>[];
 }
 
 export interface PetInterpreter<TIntent = string, TVocalization = string> {
@@ -105,7 +117,11 @@ export interface PetInterpreter<TIntent = string, TVocalization = string> {
   interpret(features: PetAcousticFeatures): PetAnalysisResult<TIntent, TVocalization>;
 }
 
-export type AudioInputData = Float32Array | number[];
+export type AudioInputData =
+  | Float32Array
+  | number[]
+  | Uint8Array
+  | ArrayBuffer;
 
 export interface AnalyzeOptions {
   sampleRate: number;

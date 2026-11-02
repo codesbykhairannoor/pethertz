@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { readFile } from 'node:fs/promises';
-import { PetHertz, decodeWav } from '@pethertz/core';
+import { PetHertz, UniversalPetInterpreter, decodeWav } from '@pethertz/core';
 import { CatInterpreter } from '@pethertz/cat';
 import { DogInterpreter } from '@pethertz/dog';
 
@@ -15,12 +15,12 @@ function printHelp() {
   pethertz <command> [options]
 
 \x1b[1mCOMMANDS:\x1b[0m
-  \x1b[32manalyze <file.wav>\x1b[0m    Analyze a WAV audio file and interpret pet vocalization
+  \x1b[32manalyze <file.wav>\x1b[0m    Analyze a WAV audio file and interpret pet vocalization (auto-detects cat/dog)
   \x1b[32minspect <file.wav>\x1b[0m    Display raw bioacoustic metrics (F0, RMS, ZCR, STFT Centroid, Formants, VTL)
   \x1b[32mdemo [cat|dog]\x1b[0m        Run a synthetic audio simulation directly in the terminal
 
 \x1b[1mOPTIONS:\x1b[0m
-  --species <cat|dog>   Specify target pet species (default: 'cat')
+  --species <auto|cat|dog> Specify target pet species (default: 'auto')
   --json                Output clean JSON format
   --help, -h            Show this help message
 
@@ -41,12 +41,12 @@ async function main() {
   const command = args[0];
   const isJson = args.includes('--json');
 
-  let species: 'cat' | 'dog' = 'cat';
+  let species: 'auto' | 'cat' | 'dog' = 'auto';
   const speciesIdx = args.indexOf('--species');
   if (speciesIdx !== -1 && args[speciesIdx + 1]) {
     const s = args[speciesIdx + 1]?.toLowerCase();
-    if (s === 'dog' || s === 'cat') {
-      species = s;
+    if (s === 'dog' || s === 'cat' || s === 'auto') {
+      species = s as any;
     }
   }
 
@@ -90,10 +90,16 @@ async function main() {
     try {
       const fileBytes = await readFile(filePath);
       const decoded = decodeWav(fileBytes);
+      const interpreter =
+        species === 'dog'
+          ? new DogInterpreter()
+          : species === 'cat'
+          ? new CatInterpreter()
+          : new UniversalPetInterpreter();
 
       if (command === 'inspect') {
         const engine = new PetHertz({
-          interpreter: species === 'dog' ? new DogInterpreter() : new CatInterpreter(),
+          interpreter,
           defaultSampleRate: decoded.sampleRate,
         });
         const res = await engine.analyze(decoded.audioData);
@@ -126,7 +132,7 @@ async function main() {
 
       // Analyze command
       const engine = new PetHertz({
-        interpreter: species === 'dog' ? new DogInterpreter() : new CatInterpreter(),
+        interpreter,
         defaultSampleRate: decoded.sampleRate,
       });
 
@@ -170,6 +176,14 @@ function printResult(res: any, isJson: boolean) {
   console.log(`Affective State  : Valence: \x1b[36m${res.affectiveDimensions?.valence}\x1b[0m | Arousal: \x1b[35m${res.affectiveDimensions?.arousal}\x1b[0m | Urgency: \x1b[31m${res.affectiveDimensions?.urgency?.toUpperCase()}\x1b[0m`);
   console.log(`Pitch F0         : ${res.acousticMetrics.fundamentalFrequencyHz} Hz [${res.acousticMetrics.intonationContour}] (Jitter: ${(res.acousticMetrics.pitchJitter * 100).toFixed(1)}%)`);
   console.log(`Signal Duration  : ${res.acousticMetrics.durationMs} ms (Bursts: ${res.acousticMetrics.burstCount})`);
+  if (res.events && res.events.length > 1) {
+    console.log(`-----------------------------------------------------`);
+    console.log(`\x1b[1mEvent Timeline (${res.events.length} segmented bursts):\x1b[0m`);
+    for (let idx = 0; idx < res.events.length; idx++) {
+      const ev = res.events[idx];
+      console.log(`  [#${idx + 1}] ${ev.startMs}ms - ${ev.endMs}ms (${ev.durationMs}ms): ${ev.vocalization} -> ${ev.intent}`);
+    }
+  }
   console.log(`-----------------------------------------------------`);
   console.log(`\x1b[1mExplanation:\x1b[0m`);
   console.log(`  ${res.humanExplanation}`);

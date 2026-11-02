@@ -7,4 +7,5 @@ export * from './dsp/formants.js';
 export * from './dsp/mfcc.js';
 export * from './io/wav.js';
 export * from './stream/StreamAnalyzer.js';
+export * from './UniversalPetInterpreter.js';
 export * from './engine.js';
