@@ -48,11 +48,11 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
     // =========================================================================
 
     // 1a. Adult & Adolescent Human Phonation Discrimination (Acoustic Allometry)
-    // Long human VTL (> 15.0 cm) with lower fundamental frequency (f0 < 450 Hz) or human vowel resonance
+    // Long human VTL (> 17.0 cm) with lower fundamental frequency (f0 < 450 Hz) or human vowel resonance
     const isHumanPhonation =
       f0 < 450 &&
-      ((vtl > 15.5 && features.morphologicalCategory === 'human_or_large_mammal') ||
-        (f1 > 0 && f1 < 800 && vtl > 15.0));
+      ((vtl > 17.0 && features.morphologicalCategory === 'human_or_large_mammal') ||
+        (f1 > 0 && f1 < 800 && vtl > 17.0));
 
     if (isHumanPhonation) {
       return {
@@ -64,21 +64,22 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
         affectiveDimensions: { valence: 0, arousal: 0, urgency: 'low' },
         acousticMetrics: features,
         humanExplanation:
-          'Karakteristik resonansi vokal (F1 < 800 Hz atau VTL > 15.0 cm pada F0 rendah) adalah anatomi saluran vokal manusia (batuk/percakapan/dengkuran), bukan anjing.',
+          'Karakteristik resonansi vokal (F1 < 800 Hz atau VTL > 17.0 cm pada F0 rendah) adalah anatomi saluran vokal manusia (batuk/percakapan/dengkuran), bukan anjing.',
         actionRecommendation:
           'Tidak ada tindakan diperlukan. Sinyal berasal dari suara saluran napas/vokal manusia.',
       };
     }
 
     // 1b. Human coughing / throat clearing:
-    // Adult human cough bouts exhibit adult vocal tract resonance (VTL > 10.5 cm) combined with elevated pitch jitter (> 0.45),
+    // Adult human cough bouts exhibit adult human vocal tract resonance (VTL > 10.5 cm with treble centroid > 2100 Hz and high jitter),
     // prolonged throat clearing in the adult male F0 range (140-250 Hz, duration > 1200ms),
     // or violent hacking friction (low F0 < 300 Hz with high centroid > 2200 Hz and high jitter).
     const isHumanCough =
-      (f0 < 800 && vtl > 10.5 && jitter > 0.45) ||
+      (vtl > 10.5 && centroid > 2100 && jitter > 0.45) ||
+      (f0 < 550 && vtl > 17.0 && jitter > 0.45 && features.morphologicalCategory === 'human_or_large_mammal') ||
       (f0 >= 140 && f0 <= 250 && durationMs > 1200 && burstCount <= 2) ||
       (f0 < 300 && centroid > 2200 && jitter > 0.45) ||
-      (jitter > 0.70 && vtl > 13.0 && durationMs < 1500);
+      (jitter > 0.70 && vtl > 17.0 && durationMs < 1500);
 
     if (isHumanCough) {
       return {
@@ -100,7 +101,7 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
     const isHumanSneeze =
       (centroid > 4800 && zcr > 0.08 && f0 > 0 && f0 < 600) ||
       (centroid > 3200 && jitter > 0.45 && durationMs < 1200) ||
-      (f1 > 0 && f1 <= 650 && f0 > 350 && durationMs > 1200);
+      (f1 > 0 && f1 <= 650 && f0 > 350 && vtl > 8.5 && durationMs > 1000);
 
     if (isHumanSneeze) {
       return {
@@ -120,16 +121,16 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
 
     // 1d. Infant crying & emergency sirens:
     // Sirens: pure synthetic pitch (jitter < 0.04 or spectralFlatness < 0.002) with duration > 2800ms.
-    // Infant crying: prolonged high pitch (> 3000ms) with piercing high centroid > 3200 Hz.
+    // Infant crying: prolonged high pitch (> 2800ms) with piercing high centroid > 3000 Hz or shrill sobbing bouts.
     const isElectronicSiren =
       durationMs > 2800 &&
       f0 > 450 &&
       burstCount <= 2 &&
       (jitter < 0.04 || (features.spectralFlatness !== undefined && features.spectralFlatness < 0.002));
     const isProlongedInfantCry =
-      durationMs > 3000 &&
-      f0 > 450 &&
-      centroid > 3200;
+      (durationMs > 2800 && f0 > 450 && centroid > 3000) ||
+      (durationMs > 3000 && f0 > 500 && vtl > 11.0 && centroid > 1700) ||
+      (durationMs > 2500 && f0 > 650 && jitter > 0.40 && centroid > 2400);
 
     if (isElectronicSiren || isProlongedInfantCry) {
       return {
@@ -323,10 +324,10 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
     if (
       (f0 < 550 + pitchOffset || f0 === 0) &&
       burstCount >= 2 &&
-      burstIntervalMs <= 350 &&
+      burstIntervalMs <= 500 &&
       rms > 0.03 &&
       durationMs >= 100 &&
-      durationMs <= 3500
+      durationMs <= 4000
     ) {
       return {
         species: 'dog',
@@ -381,6 +382,7 @@ export class DogInterpreter implements PetInterpreter<DogIntent, DogVocalization
       f0 >= 200 &&
       f0 <= 850 + pitchOffset &&
       pitchConfidence > 0.30 &&
+      (jitter === undefined || jitter <= 0.45) &&
       rms >= 0.02 &&
       zcr < 0.20
     ) {

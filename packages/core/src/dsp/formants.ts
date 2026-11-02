@@ -206,10 +206,10 @@ export function estimateVocalTractDimensions(
       morphologicalCategory = 'feline'; // Cat vocal tract is ~4-6 cm
     } else if (safeVtl > 7.5 && safeVtl <= 11.5) {
       morphologicalCategory = 'canine_small'; // Small-medium dog is ~8-11 cm
-    } else if (safeVtl > 11.5 && safeVtl <= 15.5) {
-      morphologicalCategory = 'canine_large'; // Large dog (Mastiff, GSD, Lab) is ~12-15 cm
-    } else if (safeVtl > 15.5) {
-      morphologicalCategory = 'human_or_large_mammal'; // Adult human is ~15.5-18 cm
+    } else if (safeVtl > 11.5 && safeVtl <= 17.0) {
+      morphologicalCategory = 'canine_large'; // Large dog (Mastiff, GSD, Lab) is ~12-17 cm
+    } else if (safeVtl > 17.0) {
+      morphologicalCategory = 'human_or_large_mammal'; // Adult human is ~17-20 cm
     }
   }
 

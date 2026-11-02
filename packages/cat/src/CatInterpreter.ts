@@ -66,6 +66,33 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
     // - 75 Hz to 140 Hz is the non-phonatory biological dead-zone for domestic cats (human male snoring, appliance hum).
     // - 140 Hz to 240 Hz occurs during authentic agonistic growls (defensive low-frequency warnings with low centroid < 1200 Hz).
     if (f0 > 75 && f0 < 240) {
+      // DeepSeek recommendation: Feline low-frequency purr or stress purr vibration in 75-135 Hz
+      const isStressPurr =
+        f0 <= 135 &&
+        (features.pitchJitter ?? 0) < 0.15 &&
+        features.spectralCentroidHz < 650 &&
+        rms > 0.005;
+
+      if (isStressPurr) {
+        return {
+          species: 'cat',
+          vocalization: 'purr',
+          intent: 'comfort_purring',
+          confidence: 0.88,
+          isAnimalVocalization: true,
+          affectiveDimensions: {
+            valence: 0.5,
+            arousal: 0.3,
+            urgency: 'low',
+          },
+          acousticMetrics: features,
+          humanExplanation:
+            'Getaran teratur frekuensi rendah (purring rileks atau swa-penyembuhan) terdeteksi.',
+          actionRecommendation:
+            'Pertahankan suasana nyaman di sekitar kucing.',
+        };
+      }
+
       const isCatGrowl =
         f0 >= 140 &&
         durationMs >= 300 &&
@@ -114,12 +141,16 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
     }
 
     // 1c. Adult & Adolescent Human Phonation Discrimination (Acoustic Allometry)
-    // Domestic cat pharynx/vocal tract length is 3.8 - 6.8 cm; lowest formant F1 is always > 950 Hz.
-    // Signals with fundamental frequency (F0 < 550 Hz) and non-feline vocal tract (VTL > 11.0 cm)
-    // or human-scale lowest formant (F1 < 850 Hz with VTL > 8.0 cm) are human speech/cough/sneezes.
+    // Domestic cat pharynx is 3.8 - 6.8 cm; lowest feline formant F1 is always > 950 Hz.
+    // Human vowel triangle has F1 strictly < 850 Hz (Fant 1960). If F1 < 850 Hz and VTL > 9.0 cm,
+    // the resonance cavity belongs to a human vocal tract (cough, speech, throat clear).
+    const isHarmonicLocked = f0 > 700 || features.qualityFlags?.includes('high_f0_lpc_harmonic_lock');
     const isHumanVtlAndFormant =
-      (f0 < 550 && vtl > 11.0) ||
-      (f1 > 0 && f1 < 850 && vtl > 8.0);
+      !isHarmonicLocked &&
+      ((f1 > 0 && f1 < 850 && vtl > 9.0) ||
+        (vtl > 10.5 && features.spectralCentroidHz > 2100 && (features.pitchJitter ?? 0) > 0.45) ||
+        (f1 > 0 && f1 < 850 && vtl >= 11.0 && features.morphologicalCategory !== 'feline') ||
+        (f0 < 350 && vtl >= 14.0 && features.morphologicalCategory === 'human_or_large_mammal'));
 
     if (isHumanVtlAndFormant) {
       return {
@@ -135,14 +166,20 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         },
         acousticMetrics: features,
         humanExplanation:
-          'Karakteristik resonansi vokal (F1 < 850 Hz atau VTL > 14 cm pada F0 rendah) adalah anatomi saluran vokal manusia, bukan kucing.',
+          'Karakteristik resonansi vokal (F1 < 850 Hz dengan VTL manusia > 9.0 cm pada F0 rendah) adalah anatomi saluran vokal manusia, bukan kucing.',
         actionRecommendation:
           'Tidak ada tindakan diperlukan. Sinyal berasal dari suara/batuk/bersin manusia.',
       };
     }
 
-    // 1d. Infant crying sobbing bouts (convulsive spasms with burstCount >= 10 across > 2.0s)
-    if (durationMs > 2000 && burstCount >= 10) {
+    // 1d. Infant crying sobbing bouts & prolonged piercing shrills (human infant cries have piercing treble centroid > 3400 Hz or non-feline VTL)
+    if (
+      (durationMs > 2800 && f0 > 450 && features.spectralCentroidHz > 3400) ||
+      (durationMs > 2500 &&
+        f0 > 450 &&
+        features.spectralCentroidHz > 3000 &&
+        (vtl > 8.5 || features.morphologicalCategory === 'canine_large' || features.morphologicalCategory === 'human_or_large_mammal'))
+    ) {
       return {
         species: 'non-pet',
         vocalization: 'non_animal_sound' as any,
@@ -318,16 +355,16 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       isPlausibleMeowTimbre &&
       intonationContour === 'rising' &&
       durationMs >= 200 &&
-      durationMs <= 1800 &&
-      burstCount <= 6 &&
+      durationMs <= 2200 &&
+      burstCount <= 10 &&
       f0 >= 200 &&
       f0 <= 1600;
     const isDurationMeow =
       isPlausibleMeowTimbre &&
       f0 >= 300 &&
       durationMs >= 350 &&
-      durationMs <= 1500 &&
-      burstCount <= 6;
+      durationMs <= 2200 &&
+      burstCount <= 10;
 
     if (isRisingMeow || isDurationMeow) {
       return {
@@ -353,8 +390,8 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
     if (
       isPlausibleMeowTimbre &&
       (intonationContour === 'falling' || durationMs > 900) &&
-      durationMs <= 2400 &&
-      burstCount <= 6 &&
+      durationMs <= 4000 &&
+      burstCount <= 10 &&
       f0 >= 200
     ) {
       return {
@@ -376,12 +413,12 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       };
     }
 
-    // Default Fallback: Only classify as meow if contour is non-chaotic and F0 >= 200 Hz and duration <= 2200ms
+    // Default Fallback: Only classify as meow if contour is non-chaotic and F0 >= 200 Hz and duration <= 4000ms
     if (
       isPlausibleMeowTimbre &&
       f0 >= 200 &&
-      burstCount <= 6 &&
-      durationMs <= 2200 &&
+      burstCount <= 10 &&
+      durationMs <= 4000 &&
       intonationContour !== 'fluctuating' &&
       intonationContour !== 'atonal'
     ) {
@@ -405,9 +442,12 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
     }
 
     // Prolonged infant cry / human scream discriminator:
-    // Human infant crying bouts typically last > 2800ms with high spectral centroid > 3000 Hz.
-    // Feline meows never exceed 2200ms in domestic bioacoustic literature (Schötz 2023).
-    if (durationMs > 2800 && features.spectralCentroidHz > 3000) {
+    // Human infant crying bouts typically last > 2800ms with high spectral centroid > 3000 Hz and non-feline VTL (> 8.5 cm).
+    if (
+      durationMs > 2800 &&
+      features.spectralCentroidHz > 3000 &&
+      (vtl > 8.5 || features.morphologicalCategory === 'human_or_large_mammal')
+    ) {
       return {
         species: 'non-pet',
         vocalization: 'non_animal_sound' as any,

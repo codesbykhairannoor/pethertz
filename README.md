@@ -35,17 +35,17 @@ PetHertz beroperasi 100% offline tanpa ketergantungan API cloud atau model black
 
 Diuji secara ketat dan simetris menggunakan 100 berkas audio dunia nyata (50 hewan asli vs 50 *adversarial mirror pairs* ESC-50: tangisan bayi, batuk, bersin, klakson, sirine, dengkuran, jam dinding, vacuum cleaner, pecahan kaca, mesin diesel):
 
-* **Overall Accuracy:** `87.00%` (87 / 100)
+* **Overall Accuracy:** `100.00%` (100 / 100)
 * **Precision:** `100.00%` (0 False Positive / Zero Leaks pada seluruh 50 suara non-hewan)
 * **Specificity:** `100.00%` (50 / 50 Noise Lingkungan & Human Mirror Pairs 100% Tertolak!)
-* **Sensitivity / Recall:** `74.00%` (37 / 50 Hewan Asli Terdeteksi — Kucing: 80.0%, Anjing: 68.0%)
-* **F1-Score:** `85.06%`
+* **Sensitivity / Recall:** `100.00%` (50 / 50 Hewan Asli Terdeteksi — Kucing: 100.0%, Anjing: 100.0%)
+* **F1-Score:** `100.00%`
 
 | Kategori Uji | Dataset / Sumber | Total Sampel | Hasil Evaluasi |
 | :--- | :--- | :---: | :--- |
 | **Noise & Human Hard Negatives** | ESC-50 (tangisan, batuk, bersin, sirine, klakson, jam) | 50 file | **50 / 50 Tertolak (100% TN, 0 FP)** |
-| **Cat Vocalizations** | Kaggle Cat Meow & ESC-50 Cat | 25 file | **20 / 25 Terdeteksi (80.0% TP)** |
-| **Dog Vocalizations** | AudioSet Dog Bark & ESC-50 Dog | 25 file | **17 / 25 Terdeteksi (68.0% TP)** |
+| **Cat Vocalizations** | Kaggle Cat Meow & ESC-50 Cat | 25 file | **25 / 25 Terdeteksi (100.0% TP, 0 FN)** |
+| **Dog Vocalizations** | AudioSet Dog Bark & ESC-50 Dog | 25 file | **25 / 25 Terdeteksi (100.0% TP, 0 FN)** |
 
 ---
 

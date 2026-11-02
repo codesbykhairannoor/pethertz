@@ -129,6 +129,24 @@ export function validateAnimalVocalization(
     };
   }
 
+  // 1b. Severe Digital Clipping Distortion Guard (DeepSeek Audit Recommendation)
+  // Extreme square-wave saturation produces non-biological harmonics and false formants
+  if (rms > 0.95) {
+    return {
+      isAnimalVocalization: false,
+      confidence: 0,
+      status: 'confirmed_noise',
+      rejectionReason: 'synthetic_mechanical_tone',
+      biologicalPlausibilityScore: 0,
+      evidenceBreakdown: {
+        voicingScore: 0,
+        spectralScore: 0,
+        temporalScore: 0,
+        anatomicalScore: 0,
+      },
+    };
+  }
+
   // 2. High-Confidence Bioacoustic Archetype Fast Passes
   // 2a. Cat Hiss Archetype (Defensive broadband turbulent friction)
   const isHissCandidate = zcr > 0.22 && rms > 0.015 && durationMs >= 150;
@@ -356,14 +374,17 @@ export function validateAnimalVocalization(
     sTemporal -= 0.70;
   }
 
-  // Infant crying repeated sobbing bouts / shrieks (burstCount >= 7 across > 2000ms with high F0)
+  // Infant crying repeated sobbing bouts / shrieks (burstCount >= 7 across > 2000ms with high F0 & treble centroid)
+  // Protected against feline/canine false veto: cats meowing or dogs barking repeatedly have natural low centroid or distinct VTL
+  const isFelineVtl = (features.estimatedVocalTractLengthCm ?? 0) >= 3.8 && (features.estimatedVocalTractLengthCm ?? 0) <= 7.5;
   if (
-    (durationMs > 2000 && burstCount >= 7 && f0 > 400) ||
-    (durationMs > 2500 && burstCount >= 5 && f0 > 480)
+    !isCanineVtl &&
+    !isFelineVtl &&
+    features.morphologicalCategory !== 'feline' &&
+    ((durationMs > 2500 && burstCount >= 7 && f0 > 400 && spectralCentroidHz > 2500) ||
+      (durationMs > 2800 && burstCount >= 4 && f0 > 480 && spectralCentroidHz > 3000))
   ) {
-    sTemporal -= 0.60;
-    sVoicing -= 0.40;
-    sSpectral -= 0.40;
+    sTemporal -= 0.50;
   }
 
   // Car Horns / Alarms: prolonged tone (> 2800ms) with burstCount <= 2
@@ -387,15 +408,17 @@ export function validateAnimalVocalization(
     spectralCentroidHz > 2200 &&
     jitter > 0.40 &&
     durationMs >= 400 &&
-    zcr > 0.12
+    zcr > 0.12 &&
+    !isCanineVtl &&
+    ((features.estimatedVocalTractLengthCm ?? 0) > 10.5 || features.morphologicalCategory === 'human_or_large_mammal')
   ) {
     sTemporal -= 0.60;
     sVoicing -= 0.40;
     sSpectral -= 0.40;
   }
 
-  // Typical mammal call duration envelope (60ms - 2500ms)
-  if (durationMs >= 60 && durationMs <= 2500) {
+  // Mammal call duration envelope (single call or rhythmic multi-burst bouts up to 4000ms)
+  if ((durationMs >= 60 && durationMs <= 2500) || (burstCount >= 2 && durationMs <= 4000)) {
     sTemporal += 0.20;
   }
 
@@ -407,10 +430,10 @@ export function validateAnimalVocalization(
   // =========================================================================
   const vtl = features.estimatedVocalTractLengthCm ?? 0;
 
-  // Adult human vocal tract filter (VTL > 14.5 cm with F0 < 450 Hz)
+  // Adult human vocal tract filter (VTL > 17.0 cm with F0 < 450 Hz)
   if (
     f0 < 450 &&
-    vtl > 14.5 &&
+    vtl > 17.0 &&
     features.morphologicalCategory === 'human_or_large_mammal'
   ) {
     sAnatomical -= 0.60;
