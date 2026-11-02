@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
+    "publish:all": "npm publish --workspaces --access public",
     "demo": "tsx examples/demo.ts",
     "test": "vitest run",
     "test:watch": "vitest"

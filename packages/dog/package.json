@@ -12,6 +12,21 @@
       "default": "./dist/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codesbykhairannoor/pethertz.git",
+    "directory": "packages/dog"
+  },
+  "bugs": {
+    "url": "https://github.com/codesbykhairannoor/pethertz/issues"
+  },
+  "homepage": "https://github.com/codesbykhairannoor/pethertz#readme",
   "dependencies": {
     "@pethertz/core": "^0.1.0"
   },
@@ -27,4 +42,3 @@
   "author": "PetHertz Open Source Contributors",
   "license": "MIT"
 }
-

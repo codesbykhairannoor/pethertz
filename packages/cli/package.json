@@ -8,6 +8,21 @@
   },
   "main": "./dist/cli.js",
   "types": "./dist/cli.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codesbykhairannoor/pethertz.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/codesbykhairannoor/pethertz/issues"
+  },
+  "homepage": "https://github.com/codesbykhairannoor/pethertz#readme",
   "dependencies": {
     "@pethertz/cat": "^0.1.0",
     "@pethertz/core": "^0.1.0",
@@ -24,4 +39,3 @@
   "author": "PetHertz Open Source Contributors",
   "license": "MIT"
 }
-
