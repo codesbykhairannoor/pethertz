@@ -97,8 +97,7 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
         f0 >= 140 &&
         durationMs >= 300 &&
         durationMs <= 1800 &&
-        features.spectralCentroidHz <= 1200 &&
-        vtl <= 8.5;
+        (features.spectralCentroidHz <= 1600 || features.gatekeeper?.isAnimalVocalization);
 
       if (isCatGrowl) {
         return {
@@ -317,7 +316,7 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
     // Natural cat meows can have elevated jitter (>50%) when pitch is high (>700 Hz) due to vocal fry or quantization,
     // or when validated by Gatekeeper as an authentic animal call.
     const maxAllowedJitter =
-      f0 > 700 || features.gatekeeper?.status === 'confirmed_pet' ? 1.25 : 0.55;
+      f0 > 700 || features.gatekeeper?.status === 'confirmed_pet' || features.gatekeeper?.isAnimalVocalization ? 1.75 : 0.55;
     const isPlausibleMeowTimbre =
       (features.pitchJitter ?? 0) <= maxAllowedJitter &&
       features.spectralCentroidHz <= 5500 &&
@@ -328,7 +327,7 @@ export class CatInterpreter implements PetInterpreter<CatIntent, CatVocalization
       durationMs < 400 &&
       features.spectralCentroidHz <= 5000 &&
       isPlausibleMeowTimbre &&
-      vtl <= 9.0 &&
+      (vtl <= 9.0 || isHarmonicLocked) &&
       (intonationContour === 'rising' || (f0 >= 300 && intonationContour !== 'atonal' && intonationContour !== 'falling'))
     ) {
       return {
