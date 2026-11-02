@@ -330,3 +330,4 @@ writeFileSync(resolve(targetDir, 'index.d.ts'), dtsContent, 'utf8');
 writeFileSync(resolve(targetDir, 'cli.d.ts'), 'export {};\n', 'utf8');
 
 console.log('Successfully generated standalone dist/index.d.ts and dist/cli.d.ts');
+

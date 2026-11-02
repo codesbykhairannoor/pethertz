@@ -7,15 +7,42 @@
 </p>
 
 <p align="center">
-  <a href="#-benchmarks--scorecard"><img src="https://img.shields.io/badge/Acoustic_Accuracy-99.58%25-brightgreen.svg" alt="Accuracy 99.58%" /></a>
-  <a href="#-benchmarks--scorecard"><img src="https://img.shields.io/badge/Noise_Rejection-100%25-blue.svg" alt="Noise Rejection 100%" /></a>
-  <img src="https://img.shields.io/badge/Zero_Dependency-Pure_DSP-purple.svg" alt="Zero Dependency" />
-  <img src="https://img.shields.io/badge/License-MIT-emerald.svg" alt="License MIT" />
+  <a href="https://www.npmjs.com/package/pethertz"><img src="https://img.shields.io/npm/v/pethertz.svg?style=flat-square&color=cb3837" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/pethertz"><img src="https://img.shields.io/npm/dm/pethertz.svg?style=flat-square&color=blue" alt="npm downloads" /></a>
+  <a href="#-symmetrical-benchmark-performance-100-real-world--hard-negative-files"><img src="https://img.shields.io/badge/Acoustic_Accuracy-99.58%25-brightgreen.svg?style=flat-square" alt="Accuracy 99.58%" /></a>
+  <a href="#-symmetrical-benchmark-performance-100-real-world--hard-negative-files"><img src="https://img.shields.io/badge/Noise_Rejection-100%25-blue.svg?style=flat-square" alt="Noise Rejection 100%" /></a>
+  <img src="https://img.shields.io/badge/Zero_Dependency-Pure_DSP-purple.svg?style=flat-square" alt="Zero Dependency" />
+  <a href="https://tako.id/c/codesbykhai"><img src="https://img.shields.io/badge/Sponsor-Tako.id-ff4757.svg?style=flat-square&logo=heart" alt="Sponsor on Tako" /></a>
+  <img src="https://img.shields.io/badge/License-MIT-emerald.svg?style=flat-square" alt="License MIT" />
 </p>
 
 ---
 
 PetHertz is a zero-dependency, edge-native bioacoustic interpretation engine for domestic companion animals (cats and dogs). Grounded in peer-reviewed bioacoustic and ethological research, PetHertz decodes raw acoustic signals (meows, purrs, barks, whines, growls, and hisses) into standardized contextual intents, affective states (*valence* and *arousal*), and actionable owner recommendations.
+
+---
+
+## ⚡ Quick Start (1-Minute Setup)
+
+Install directly via npm:
+
+```bash
+npm install pethertz
+```
+
+Analyze any audio file in 3 lines of code:
+
+```typescript
+import { PetHertz } from 'pethertz';
+
+const engine = new PetHertz();
+const result = await engine.analyzeFile('cat_meow.wav');
+
+console.log(`${result.species.toUpperCase()} Vocalization: ${result.vocalization}`);
+console.log(`Inferred Intent : ${result.intent} (${Math.round(result.confidence * 100)}%)`);
+console.log(`Explanation     : ${result.humanExplanation}`);
+console.log(`Recommended     : ${result.actionRecommendation}`);
+```
 
 ---
 
@@ -107,7 +134,7 @@ pethertz demo dog
 For real-time companion animal monitoring applications (smart pet cameras, edge IoT microphones):
 
 ```typescript
-import { PetHertz } from '@pethertz/core';
+import { PetHertz } from 'pethertz';
 
 // Zero-config initialization: auto-routes between cat and dog bioacoustics
 const engine = new PetHertz();
@@ -142,7 +169,7 @@ stream.on('silence', () => {
 PetHertz provides zero-friction analysis for raw PCM buffers or directly from WAV file bytes:
 
 ```typescript
-import { PetHertz } from '@pethertz/core';
+import { PetHertz } from 'pethertz';
 import { readFile } from 'node:fs/promises';
 
 // 1. Initialize with zero boilerplate (Auto-detects species via acoustic allometry)
@@ -201,5 +228,19 @@ PetHertz maps bioacoustic features onto the two-dimensional circumplex model of 
 
 ---
 
+## 💖 Support & Sponsorship
+
+PetHertz is free, open-source software built with extensive bioacoustic research. If this project helps your app, IoT pet device, or research, consider supporting independent development:
+
+<p align="left">
+  <a href="https://tako.id/c/codesbykhai">
+    <img src="https://img.shields.io/badge/Support_on-Tako.id-ff4757.svg?style=for-the-badge&logo=heart&logoColor=white" alt="Support on Tako" />
+  </a>
+</p>
+
+👉 **Support directly via [Tako.id (codesbykhai)](https://tako.id/c/codesbykhai)**
+
+---
+
 ## 📄 License
-MIT License
+MIT License © 2026 PetHertz Open Source Contributors
