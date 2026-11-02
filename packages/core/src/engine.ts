@@ -285,19 +285,66 @@ export class PetHertz<TIntent = string, TVocalization = string> {
     // 9. Delegate to Rules Interpreter
     const interpreted = this.interpreter.interpret(acousticMetrics);
 
-    // 10. Temporal Multi-Event Timeline Segmentation
+    // 10. Temporal Multi-Event Timeline Segmentation (Independent Per-Segment Analysis)
     const events: PetEvent<TIntent, TVocalization>[] = [];
     if (segmentation.bursts.length > 0) {
       for (const burst of segmentation.bursts) {
+        const startMs = Math.round((burst.startSample / sampleRate) * 1000);
+        const endMs = Math.round((burst.endSample / sampleRate) * 1000);
+        const burstAudio = dataArray.subarray(burst.startSample, burst.endSample);
+
+        let burstVocalization = interpreted.vocalization;
+        let burstIntent = interpreted.intent;
+        let burstConfidence = interpreted.confidence;
+        let burstAffect = interpreted.affectiveDimensions;
+        let burstF0 = fundamentalFrequencyHz;
+
+        // If multi-event audio has multiple bursts, re-evaluate this specific burst interval
+        if (segmentation.bursts.length > 1 && burstAudio.length >= Math.floor(sampleRate * 0.05)) {
+          const burstRms = calculateRms(burstAudio);
+          const burstZcr = calculateZcr(burstAudio);
+          const burstCentroid = calculateSpectralCentroid(burstAudio, sampleRate);
+          const burstYin = detectPitchYin(burstAudio, {
+            sampleRate,
+            minFrequency: minFreq,
+            maxFrequency: maxFreq,
+            threshold: 0.15,
+          });
+
+          if (burstYin.frequencyHz > 0 && burstYin.confidence > 0.4) {
+            burstF0 = Math.round(burstYin.frequencyHz * 10) / 10;
+          }
+
+          // Build localized metrics for this individual burst
+          const burstMetrics: PetAcousticFeatures = {
+            ...acousticMetrics,
+            fundamentalFrequencyHz: burstF0,
+            rms: Math.round(burstRms * 1000) / 1000,
+            zeroCrossingRate: Math.round(burstZcr * 1000) / 1000,
+            spectralCentroidHz: burstCentroid,
+            durationMs: burst.durationMs,
+            burstCount: 1,
+            burstIntervalMs: 0,
+          };
+
+          const burstInterpreted = this.interpreter.interpret(burstMetrics);
+          if (burstInterpreted.isAnimalVocalization) {
+            burstVocalization = burstInterpreted.vocalization;
+            burstIntent = burstInterpreted.intent;
+            burstConfidence = burstInterpreted.confidence;
+            burstAffect = burstInterpreted.affectiveDimensions;
+          }
+        }
+
         events.push({
-          startMs: Math.round((burst.startSample / sampleRate) * 1000),
-          endMs: Math.round((burst.endSample / sampleRate) * 1000),
+          startMs,
+          endMs,
           durationMs: burst.durationMs,
-          vocalization: interpreted.vocalization,
-          intent: interpreted.intent,
-          confidence: interpreted.confidence,
-          affectiveDimensions: interpreted.affectiveDimensions,
-          fundamentalFrequencyHz,
+          vocalization: burstVocalization,
+          intent: burstIntent,
+          confidence: burstConfidence,
+          affectiveDimensions: burstAffect,
+          fundamentalFrequencyHz: burstF0,
         });
       }
     }
@@ -346,22 +393,25 @@ export class PetHertz<TIntent = string, TVocalization = string> {
 
   /**
    * Reads and analyzes an audio file from filesystem path.
-   * Node.js isomorphic helper.
+   * Node.js isomorphic helper (bundler-safe).
    */
   async analyzeFile(
     filePath: string,
     options?: Partial<AnalyzeOptions>
   ): Promise<PetAnalysisResult<TIntent, TVocalization>> {
+    if (typeof window !== 'undefined' || typeof process === 'undefined' || !process.versions?.node) {
+      throw new Error(
+        'The analyzeFile() method is only supported in Node.js environments. In browsers, use analyze() or analyzeWav() with ArrayBuffer or Float32Array.'
+      );
+    }
+
     try {
-      const { readFile } = await import('node:fs/promises');
-      const buffer = await readFile(filePath);
+      // Dynamic Function import prevents client-side bundlers (Vite/Webpack) from statically bundling node:fs
+      const dynamicImport = new Function('modulePath', 'return import(modulePath)');
+      const fs = await dynamicImport('node:fs/promises');
+      const buffer = await fs.readFile(filePath);
       return this.analyzeWav(buffer, options);
     } catch (err: any) {
-      if (err?.code === 'ERR_MODULE_NOT_FOUND' || typeof window !== 'undefined') {
-        throw new Error(
-          'The analyzeFile() method is only available in Node.js environments. Use analyzeWav() or analyze() in browsers.'
-        );
-      }
       throw err;
     }
   }

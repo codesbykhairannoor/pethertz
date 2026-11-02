@@ -94,8 +94,8 @@ async function main() {
         species === 'dog'
           ? new DogInterpreter()
           : species === 'cat'
-          ? new CatInterpreter()
-          : new UniversalPetInterpreter();
+            ? new CatInterpreter()
+            : new UniversalPetInterpreter();
 
       if (command === 'inspect') {
         const engine = new PetHertz({

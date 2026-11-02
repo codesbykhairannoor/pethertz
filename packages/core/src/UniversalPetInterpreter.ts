@@ -63,12 +63,24 @@ export class UniversalPetInterpreter implements PetInterpreter<string, string> {
     } else if (f0 >= 20 && f0 <= 70 && spectralCentroidHz < 650) {
       // 20-70 Hz low vibrational hum is feline purring
       inferredSpecies = 'cat';
-    } else if (f0 > 450 && durationMs >= 350 && burstCount <= 2 && (vtl === 0 || vtl <= 7.0)) {
+    } else if (f0 >= 70 && f0 <= 260 && durationMs >= 200) {
+      // Guttural low-frequency resonance is canine growl
+      inferredSpecies = 'dog';
+    } else if (
+      // Miniature dog whining / toy breed separation whine:
+      // High pitch (650 - 1500 Hz) with flat or atonal intonation contour (lacking feline glissando) and duration >= 300ms
+      (f0 >= 650 && (intonationContour === 'flat' || intonationContour === 'atonal') && durationMs >= 300) ||
+      (f0 > 1100 && durationMs > 350)
+    ) {
+      inferredSpecies = 'dog';
+    } else if (
+      // Canine short staccato bark (< 250ms) in 200-950 Hz range
+      durationMs < 250 && f0 >= 200 && f0 <= 950 && intonationContour !== 'fluctuating'
+    ) {
+      inferredSpecies = 'dog';
+    } else if (f0 > 450 && durationMs >= 300 && (vtl === 0 || vtl <= 7.0)) {
       // Continuous harmonic glissando vowel without staccato bursts is typical feline meow
       inferredSpecies = 'cat';
-    } else if (f0 >= 70 && f0 <= 250 && durationMs >= 250 && spectralCentroidHz > 800) {
-      // Guttural low-frequency resonance with high spectral centroid is canine growl
-      inferredSpecies = 'dog';
     }
 
     // 3. Species-Specific Vocalization & Intent Interpretation
@@ -134,6 +146,11 @@ export class UniversalPetInterpreter implements PetInterpreter<string, string> {
         humanExplanation: 'Rapid teeth chattering observed when stalking unreachable prey.',
         actionRecommendation: 'Redirect predatory energy with an interactive feather wand or laser toy.',
       };
+    }
+
+    // Guard against miniature dog whines with flat intonation:
+    if (f0 >= 700 && (intonationContour === 'flat' || intonationContour === 'atonal')) {
+      return this.interpretDog(features, speciesConfidence);
     }
 
     // Feline Meow (Schötz 2023 intonation model)
@@ -206,7 +223,7 @@ export class UniversalPetInterpreter implements PetInterpreter<string, string> {
     }
 
     // High Whine (whimpering / isolation)
-    if (f0 > 1100 || (f0 > 650 && durationMs > 800 && burstCount <= 1)) {
+    if (f0 > 1100 || (f0 > 650 && durationMs >= 350 && burstCount <= 1)) {
       return {
         species: 'dog',
         vocalization: 'whine',

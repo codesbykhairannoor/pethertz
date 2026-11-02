@@ -35,10 +35,10 @@ export class PetStreamAnalyzer<TIntent = string, TVocalization = string> {
     silence: StreamEventListener<void>[];
     metrics: StreamEventListener<PetAcousticFeatures>[];
   } = {
-    vocalization: [],
-    silence: [],
-    metrics: [],
-  };
+      vocalization: [],
+      silence: [],
+      metrics: [],
+    };
 
   constructor(
     engine: PetHertz<TIntent, TVocalization>,

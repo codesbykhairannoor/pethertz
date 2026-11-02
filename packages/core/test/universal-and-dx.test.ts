@@ -92,5 +92,63 @@ describe('UniversalPetInterpreter & Developer Experience (DX)', () => {
     stream.resume();
     expect(stream.isPaused).toBe(false);
   });
+
+  it('accurately evaluates multi-event timeline with distinct vocalizations (Bark followed by Growl)', async () => {
+    const engine = new PetHertz();
+
+    // Event 1: High Bark (750 Hz, 120ms)
+    const b1Len = Math.floor(sampleRate * 0.12);
+    const b1 = new Float32Array(b1Len);
+    for (let i = 0; i < b1Len; i++) {
+      b1[i] = 0.7 * Math.sin((2 * Math.PI * 780 * i) / sampleRate);
+    }
+
+    // Inter-burst pause (350ms silence)
+    const pauseLen = Math.floor(sampleRate * 0.35);
+    const pause = new Float32Array(pauseLen);
+
+    // Event 2: Low Growl (150 Hz, 400ms) with harmonic roughness
+    const gLen = Math.floor(sampleRate * 0.4);
+    const growl = new Float32Array(gLen);
+    for (let i = 0; i < gLen; i++) {
+      growl[i] =
+        0.5 * Math.sin((2 * Math.PI * 150 * i) / sampleRate) +
+        0.18 * Math.sin((2 * Math.PI * 300 * i) / sampleRate);
+    }
+
+    const multiEventAudio = new Float32Array(b1Len + pauseLen + gLen);
+    multiEventAudio.set(b1, 0);
+    multiEventAudio.set(pause, b1Len);
+    multiEventAudio.set(growl, b1Len + pauseLen);
+
+    const res = await engine.analyze(multiEventAudio, { sampleRate });
+    expect(res.isAnimalVocalization).toBe(true);
+    expect(res.events).toBeDefined();
+    expect(res.events!.length).toBe(2);
+
+    // Verify per-segment independent evaluation (NOT duplicate global intent!)
+    expect(res.events![0]!.vocalization).toBe('bark');
+    expect(res.events![1]!.vocalization).toBe('growl');
+    expect(res.events![1]!.intent).toBe('warning_aggression');
+  });
+
+  it('correctly classifies miniature dog whine (flat 900 Hz, high centroid) as canine whine, not cat meow', async () => {
+    const engine = new PetHertz();
+
+    // High flat whine (900 Hz, 500ms) with high centroid noise (typical toy breed whine)
+    const len = Math.floor(sampleRate * 0.5);
+    const audio = new Float32Array(len);
+    for (let i = 0; i < len; i++) {
+      audio[i] =
+        0.5 * Math.sin((2 * Math.PI * 900 * i) / sampleRate) +
+        0.1 * Math.sin((2 * Math.PI * 3600 * i) / sampleRate);
+    }
+
+    const res = await engine.analyze(audio, { sampleRate });
+    expect(res.isAnimalVocalization).toBe(true);
+    expect(res.species).toBe('dog');
+    expect(res.vocalization).toBe('whine');
+    expect(res.intent).toBe('anxiety_separation');
+  });
 });
 
