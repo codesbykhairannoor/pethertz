@@ -6,3 +6,4 @@ export * from '@pethertz/cat';
 
 // Re-export canine bioacoustic interpreter and types
 export * from '@pethertz/dog';
+

@@ -74,3 +74,4 @@ npx pethertz analyze my_cat_meow.wav
 ## 📄 License
 
 MIT © [PetHertz Open Source Contributors](https://github.com/codesbykhairannoor/pethertz)
+

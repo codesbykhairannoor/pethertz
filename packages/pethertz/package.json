@@ -1,13 +1,11 @@
 {
   "name": "pethertz",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Autonomous pet bioacoustics and vocalization interpretation engine (Cats & Dogs)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "pethertz": "./dist/cli.js"
-  },
+  "bin": "./dist/cli.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -31,13 +29,8 @@
     "url": "https://github.com/codesbykhairannoor/pethertz/issues"
   },
   "homepage": "https://github.com/codesbykhairannoor/pethertz#readme",
-  "dependencies": {
-    "@pethertz/cat": "^0.1.0",
-    "@pethertz/core": "^0.1.0",
-    "@pethertz/dog": "^0.1.0"
-  },
   "scripts": {
-    "build": "tsc -b"
+    "build": "npx esbuild src/index.ts --bundle --format=esm --platform=node --target=es2022 --outfile=dist/index.js && npx esbuild src/cli.ts --bundle --format=esm --platform=node --target=es2022 --outfile=dist/cli.js && tsc -b"
   },
   "keywords": [
     "pethertz",
